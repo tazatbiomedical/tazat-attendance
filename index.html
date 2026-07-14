@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TAZAT Biomedical - Attendance</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root{
+    --maroon:#7a1626;
+    --maroon-dark:#5c0f1c;
+    --gold:#c9a24b;
+    --cream:#fdf8ee;
+  }
+  *{box-sizing:border-box;}
+  body{
+    font-family:Arial, Helvetica, sans-serif;
+    background:var(--cream);
+    margin:0;
+    padding:0;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  header{
+    width:100%;
+    background:linear-gradient(135deg, var(--maroon), var(--maroon-dark));
+    color:#fff;
+    padding:16px 20px;
+    text-align:center;
+  }
+  header h1{margin:0;font-size:17px;letter-spacing:0.5px;}
+  header p{margin:3px 0 0;font-size:11px;color:var(--gold);}
+
+  .tabs{
+    display:flex;
+    width:100%;
+    max-width:480px;
+    margin-top:14px;
+  }
+  .tab{
+    flex:1;
+    text-align:center;
+    padding:9px;
+    background:#eee;
+    font-size:12px;
+    font-weight:700;
+    color:#666;
+    cursor:pointer;
+    border-bottom:3px solid transparent;
+  }
+  .tab.active{
+    background:#fff;
+    color:var(--maroon);
+    border-bottom:3px solid var(--gold);
+  }
+
+  .panel{
+    width:100%;
+    max-width:480px;
+    background:#fff;
+    padding:20px;
+    flex:1;
+  }
+
+  label{
+    display:block;
+    font-size:12px;
+    font-weight:700;
+    color:#444;
+    margin:12px 0 5px;
+  }
+  select, input, textarea{
+    width:100%;
+    padding:10px;
+    border:1px solid #ccc;
+    border-radius:6px;
+    font-size:14px;
+    font-family:inherit;
+  }
+  textarea{resize:vertical;min-height:60px;}
+  .status-box{
+    margin-top:14px;
+    padding:10px 12px;
+    border-radius:6px;
+    background:#f5f0e2;
+    font-size:12px;
+    color:#555;
+    line-height:1.5;
+  }
+  .status-box.ok{background:#e7f5e9;color:#256029;}
+  .status-box.err{background:#fbe7e7;color:#8a1f1f;}
+
+  .btn-row{
+    display:flex;
+    gap:10px;
+    margin-top:18px;
+  }
+  button{
+    flex:1;
+    padding:14px;
+    border:none;
+    border-radius:8px;
+    font-size:15px;
+    font-weight:700;
+    cursor:pointer;
+    color:#fff;
+  }
+  .btn-in{background:#2f8f4e;}
+  .btn-in:hover{background:#256b3c;}
+  .btn-out{background:var(--maroon);}
+  .btn-out:hover{background:var(--maroon-dark);}
+  button:disabled{opacity:0.5;cursor:not-allowed;}
+
+  .last-punch{
+    margin-top:16px;
+    font-size:12px;
+    color:#666;
+    text-align:center;
+  }
+
+  #outDetails{
+    display:none;
+    margin-top:14px;
+    padding:12px;
+    background:#fdf8ee;
+    border:1px dashed var(--gold);
+    border-radius:8px;
+  }
+  #outDetails.show{display:block;}
+
+  /* admin */
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:11px;
+    margin-top:10px;
+  }
+  th, td{
+    padding:6px 5px;
+    border-bottom:1px solid #eee;
+    text-align:left;
+    vertical-align:top;
+  }
+  th{background:var(--maroon);color:#fff;font-size:10px;}
+  .badge{
+    display:inline-block;
+    padding:2px 7px;
+    border-radius:10px;
+    font-size:9.5px;
+    font-weight:700;
+  }
+  .badge.completed{background:#e7f5e9;color:#256029;}
+  .badge.pending{background:#fff3d6;color:#8a5a00;}
+  .small-btn{
+    padding:6px 10px;
+    font-size:11px;
+    border-radius:5px;
+    background:var(--gold);
+    color:var(--maroon-dark);
+    font-weight:700;
+    border:none;
+    cursor:pointer;
+    margin-top:8px;
+    width:auto;
+  }
+  .del-btn{
+    background:#c94b4b;
+    color:#fff;
+    border:none;
+    border-radius:4px;
+    padding:4px 8px;
+    font-size:10px;
+    cursor:pointer;
+  }
+  .roster-row{
+    display:flex;
+    gap:6px;
+    margin-top:8px;
+  }
+  .roster-row input{flex:1;}
+  .roster-list{
+    margin-top:10px;
+    border:1px solid #eee;
+    border-radius:6px;
+  }
+  .roster-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:7px 10px;
+    font-size:12px;
+    border-bottom:1px solid #f2f2f2;
+  }
+  .roster-item:last-child{border-bottom:none;}
+  .loading{
+    text-align:center;
+    color:#999;
+    font-size:12px;
+    padding:20px;
+  }
+  .pin-gate{
+    text-align:center;
+    padding:30px 10px;
+  }
+  .pin-gate input{
+    max-width:160px;
+    margin:12px auto;
+    text-align:center;
+    letter-spacing:4px;
+    font-size:18px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>TAZAT BIOMEDICAL</h1>
+  <p>FIELD ATTENDANCE · CHECK-IN SYSTEM</p>
+</header>
+
+<div id="setupWarning" style="display:none;width:100%;max-width:480px;background:#fff3d6;color:#8a5a00;font-size:12px;padding:10px 16px;text-align:center;margin-top:10px;border-radius:6px;">
+  ⚠️ Setup incomplete: paste your Google Apps Script URL into the <code>API_URL</code> line near the top of this file's script. See setup instructions.
+</div>
+
+<div class="tabs">
+  <div class="tab active" id="tabPunch" onclick="switchTab('punch')">Punch In/Out</div>
+  <div class="tab" id="tabAdmin" onclick="switchTab('admin')">Admin View</div>
+</div>
+
+<div class="panel" id="punchPanel">
+  <label>Select Employee</label>
+  <select id="empSelect"><option value="">Loading roster…</option></select>
+
+  <div class="status-box" id="locStatus">Location: waiting for permission…</div>
+
+  <div class="btn-row">
+    <button class="btn-in" id="btnIn" onclick="startPunch('IN')">Punch IN</button>
+    <button class="btn-out" id="btnOut" onclick="startPunch('OUT')">Punch OUT</button>
+  </div>
+
+  <div id="outDetails">
+    <label>Work Status</label>
+    <select id="workStatus">
+      <option value="Pending">Pending</option>
+      <option value="Completed">Completed</option>
+    </select>
+    <label>What work was done?</label>
+    <textarea id="workNote" placeholder="e.g. Calibrated 3 ventilators at City Hospital, pending 2 more tomorrow"></textarea>
+    <button class="btn-out" style="margin-top:12px;" onclick="confirmPunchOut()">Confirm Punch OUT</button>
+  </div>
+
+  <div class="last-punch" id="lastPunch"></div>
+</div>
+
+<div class="panel" id="adminPanel" style="display:none;">
+
+  <div class="pin-gate" id="pinGate">
+    <p style="font-size:13px;color:#555;">Enter Admin PIN to view attendance data</p>
+    <input type="password" id="adminPinInput" maxlength="4" placeholder="****">
+    <div>
+      <button class="small-btn" onclick="checkPin()">Unlock</button>
+    </div>
+    <div class="status-box err" id="pinError" style="display:none;max-width:220px;margin:10px auto;">Wrong PIN</div>
+  </div>
+
+  <div id="adminContent" style="display:none;">
+    <label>Manage Roster</label>
+    <div class="roster-row">
+      <input id="newEmpName" placeholder="Employee name">
+      <input id="newEmpId" placeholder="Employee ID" style="max-width:100px;">
+    </div>
+    <button class="small-btn" onclick="addEmployee()">+ Add Employee</button>
+    <div class="roster-list" id="rosterList"></div>
+
+    <label style="margin-top:20px;">Daily Records → Excel</label>
+    <button class="small-btn" onclick="exportAllDaysExcel()">Export All Days (one workbook, one tab per day)</button>
+    <div id="dailyExportWrap" class="loading">Loading dates…</div>
+
+    <label style="margin-top:20px;">Full Attendance Log (latest 100)</label>
+    <button class="small-btn" onclick="exportCSV()">Export Full Log (CSV)</button>
+    <div id="logTableWrap" class="loading">Loading log…</div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// SETUP: paste your Google Apps Script Web App URL below.
+// See the setup instructions provided alongside this file.
+// ============================================================
+const API_URL = "https://script.google.com/macros/s/AKfycbw9sDgBtSGCoU89E1CvFA_DvWIXTlf_87d0E7XuhwrG_6Jr-kK4rNpcuSvbS7HzBNpl/exec";
+
+let roster = [];
+let cachedLog = [];
+let currentCoords = null;
+let pendingPunch = null; // {empId, empName}
+const ADMIN_PIN = "1234"; // change this to your own 4-digit PIN
+let adminUnlocked = false;
+
+function apiConfigured(){
+  return API_URL && API_URL.indexOf("PASTE_YOUR") === -1;
+}
+
+async function apiCall(params){
+  if(!apiConfigured()){
+    console.warn("API_URL not configured yet.");
+    return null;
+  }
+  try{
+    const qs = new URLSearchParams(params).toString();
+    const res = await fetch(`${API_URL}?${qs}`);
+    if(!res.ok) throw new Error("Network response not ok");
+    return await res.json();
+  }catch(e){
+    console.error("API call failed:", e);
+    return null;
+  }
+}
+
+function showSetupWarning(){
+  const el = document.getElementById('setupWarning');
+  if(el) el.style.display = apiConfigured() ? 'none' : 'block';
+}
+
+async function loadRoster(){
+  showSetupWarning();
+  if(!apiConfigured()){
+    roster = [];
+    renderRosterSelect();
+    renderRosterList();
+    return;
+  }
+  const r = await apiCall({action:'getRoster'});
+  roster = (r && Array.isArray(r)) ? r : [];
+  renderRosterSelect();
+  renderRosterList();
+}
+
+function renderRosterSelect(){
+  const sel = document.getElementById('empSelect');
+  const prev = sel.value;
+  sel.innerHTML = '<option value="">-- Select your name --</option>' +
+    roster.map(e => `<option value="${e.id}">${e.name} (${e.id})</option>`).join('');
+  sel.value = prev;
+}
+
+function renderRosterList(){
+  const wrap = document.getElementById('rosterList');
+  if(roster.length === 0){
+    wrap.innerHTML = '<div class="roster-item">No employees added yet.</div>';
+    return;
+  }
+  wrap.innerHTML = roster.map(e => `
+    <div class="roster-item">
+      <span>${e.name} (${e.id})</span>
+      <button class="del-btn" onclick="deleteEmployee('${e.id}')">Delete</button>
+    </div>
+  `).join('');
+}
+
+async function addEmployee(){
+  const name = document.getElementById('newEmpName').value.trim();
+  const id = document.getElementById('newEmpId').value.trim();
+  if(!name || !id){ alert('Enter both name and ID'); return; }
+  if(roster.some(e => e.id === id)){ alert('Employee ID already exists'); return; }
+  const result = await apiCall({action:'addEmployee', id, name});
+  if(!result){ alert('Could not save — check your Apps Script setup'); return; }
+  document.getElementById('newEmpName').value = '';
+  document.getElementById('newEmpId').value = '';
+  await loadRoster();
+}
+
+async function deleteEmployee(id){
+  const emp = roster.find(e => e.id === id);
+  if(!confirm(`Remove ${emp.name} from the roster? Their past attendance records stay in the log.`)) return;
+  const result = await apiCall({action:'deleteEmployee', id});
+  if(!result){ alert('Could not delete — check your Apps Script setup'); return; }
+  await loadRoster();
+}
+
+function switchTab(tab){
+  document.getElementById('tabPunch').classList.toggle('active', tab==='punch');
+  document.getElementById('tabAdmin').classList.toggle('active', tab==='admin');
+  document.getElementById('punchPanel').style.display = tab==='punch' ? 'block' : 'none';
+  document.getElementById('adminPanel').style.display = tab==='admin' ? 'block' : 'none';
+  if(tab==='admin'){
+    if(adminUnlocked){
+      loadLog();
+    } else {
+      document.getElementById('pinGate').style.display = 'block';
+      document.getElementById('adminContent').style.display = 'none';
+    }
+  }
+}
+
+function checkPin(){
+  const val = document.getElementById('adminPinInput').value;
+  if(val === ADMIN_PIN){
+    adminUnlocked = true;
+    document.getElementById('pinGate').style.display = 'none';
+    document.getElementById('adminContent').style.display = 'block';
+    loadLog();
+  } else {
+    document.getElementById('pinError').style.display = 'block';
+  }
+}
+
+function requestLocation(){
+  const statusEl = document.getElementById('locStatus');
+  if(!navigator.geolocation){
+    statusEl.textContent = 'Location: not supported on this browser';
+    statusEl.className = 'status-box err';
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(
+    (pos)=>{
+      currentCoords = {lat: pos.coords.latitude.toFixed(5), lng: pos.coords.longitude.toFixed(5)};
+      statusEl.textContent = `Location captured: ${currentCoords.lat}, ${currentCoords.lng}`;
+      statusEl.className = 'status-box ok';
+    },
+    (err)=>{
+      statusEl.textContent = 'Location: permission denied — punch will be logged without GPS';
+      statusEl.className = 'status-box err';
+      currentCoords = null;
+    },
+    {enableHighAccuracy:true, timeout:8000}
+  );
+}
+
+function startPunch(type){
+  const empId = document.getElementById('empSelect').value;
+  if(!empId){ alert('Select your name first'); return; }
+  const emp = roster.find(e => e.id === empId);
+  pendingPunch = {empId: emp.id, empName: emp.name};
+
+  if(type === 'IN'){
+    savePunch('IN', null, null);
+  } else {
+    document.getElementById('outDetails').classList.add('show');
+    document.getElementById('workNote').focus();
+  }
+}
+
+async function confirmPunchOut(){
+  const note = document.getElementById('workNote').value.trim();
+  if(!note){ alert('Please describe the work done before punching out'); return; }
+  const status = document.getElementById('workStatus').value;
+  await savePunch('OUT', status, note);
+  document.getElementById('outDetails').classList.remove('show');
+  document.getElementById('workNote').value = '';
+}
+
+async function savePunch(type, status, note){
+  if(!apiConfigured()){
+    alert('Setup not complete yet — the Google Sheet link needs to be added to this page first.');
+    return;
+  }
+  document.getElementById('btnIn').disabled = true;
+  document.getElementById('btnOut').disabled = true;
+
+  const now = new Date();
+  const record = {
+    empId: pendingPunch.empId,
+    empName: pendingPunch.empName,
+    type: type,
+    timestamp: now.toISOString(),
+    displayTime: now.toLocaleString('en-IN'),
+    lat: currentCoords ? currentCoords.lat : '',
+    lng: currentCoords ? currentCoords.lng : '',
+    workStatus: status || '',
+    workNote: note || ''
+  };
+
+  const result = await apiCall({action:'addPunch', ...record});
+
+  document.getElementById('btnIn').disabled = false;
+  document.getElementById('btnOut').disabled = false;
+
+  document.getElementById('lastPunch').textContent = result
+    ? `✓ Punched ${type} for ${record.empName} at ${record.displayTime}${currentCoords ? ' ('+currentCoords.lat+', '+currentCoords.lng+')' : ' (no GPS)'}`
+    : 'Failed to save punch — check your internet connection and try again';
+}
+
+async function loadLog(){
+  const wrap = document.getElementById('logTableWrap');
+  wrap.innerHTML = '<div class="loading">Loading log…</div>';
+  if(!apiConfigured()){
+    wrap.innerHTML = '<div class="loading">Google Sheet not connected yet.</div>';
+    document.getElementById('dailyExportWrap').innerHTML = '';
+    return;
+  }
+  const log = await apiCall({action:'getLog'}) || [];
+  cachedLog = log;
+  if(log.length === 0){
+    wrap.innerHTML = '<div class="loading">No punches yet.</div>';
+    document.getElementById('dailyExportWrap').innerHTML = '<div class="loading">No punches yet.</div>';
+    return;
+  }
+  let html = '<table><tr><th>Employee</th><th>Type</th><th>Time</th><th>Location</th><th>Status</th><th>Work Note</th></tr>';
+  log.forEach(r=>{
+    const badge = r.workStatus ? `<span class="badge ${r.workStatus.toLowerCase()}">${r.workStatus}</span>` : '—';
+    html += `<tr><td>${r.empName}</td><td>${r.type}</td><td>${r.displayTime}</td><td>${r.lat ? r.lat+', '+r.lng : '—'}</td><td>${badge}</td><td>${r.workNote || '—'}</td></tr>`;
+  });
+  html += '</table>';
+  wrap.innerHTML = html;
+
+  renderDailyExport(log);
+}
+
+// Groups records by calendar date (based on the device's local date at punch time)
+function groupByDate(log){
+  const groups = {};
+  log.forEach(r=>{
+    const d = new Date(r.timestamp);
+    const dateKey = d.toLocaleDateString('en-IN', {year:'numeric', month:'2-digit', day:'2-digit'}); // DD/MM/YYYY
+    if(!groups[dateKey]) groups[dateKey] = [];
+    groups[dateKey].push(r);
+  });
+  return groups;
+}
+
+function renderDailyExport(log){
+  const wrap = document.getElementById('dailyExportWrap');
+  const groups = groupByDate(log);
+  const todayKey = new Date().toLocaleDateString('en-IN', {year:'numeric', month:'2-digit', day:'2-digit'});
+  const dates = Object.keys(groups).sort((a,b)=>{
+    // sort dates descending (parse DD/MM/YYYY)
+    const [da,ma,ya] = a.split('/'); const [db,mb,yb] = b.split('/');
+    return new Date(yb,mb-1,db) - new Date(ya,ma-1,da);
+  });
+
+  wrap.innerHTML = dates.map(dateKey=>{
+    const records = groups[dateKey];
+    const isToday = dateKey === todayKey;
+    const empCount = new Set(records.map(r=>r.empId)).size;
+    return `
+      <div class="roster-item">
+        <span>
+          <b>${dateKey}</b> ${isToday ? '<span class="badge pending">Today · still open</span>' : '<span class="badge completed">Day closed</span>'}
+          <br><span style="color:#888;">${records.length} punches · ${empCount} employees</span>
+        </span>
+        <button class="small-btn" onclick="exportDayExcel('${dateKey}')">Export .xlsx</button>
+      </div>
+    `;
+  }).join('');
+}
+
+function exportDayExcel(dateKey){
+  const log = cachedLog || [];
+  const groups = groupByDate(log);
+  const records = groups[dateKey] || [];
+  if(records.length === 0){ alert('No records for this date'); return; }
+
+  // sort by employee then time for readability
+  records.sort((a,b)=> a.empName.localeCompare(b.empName) || new Date(a.timestamp) - new Date(b.timestamp));
+
+  const rows = records.map(r=>({
+    "Employee ID": r.empId,
+    "Employee Name": r.empName,
+    "Punch Type": r.type,
+    "Time": r.displayTime,
+    "Latitude": r.lat || '',
+    "Longitude": r.lng || '',
+    "Work Status": r.workStatus || '',
+    "Work Note": r.workNote || ''
+  }));
+
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [
+    {wch:12},{wch:22},{wch:10},{wch:20},{wch:10},{wch:10},{wch:12},{wch:45}
+  ];
+  const wb = XLSX.utils.book_new();
+  const safeSheetName = dateKey.replace(/\//g, '-');
+  XLSX.utils.book_append_sheet(wb, ws, safeSheetName);
+
+  const safeFileDate = dateKey.replace(/\//g, '-');
+  XLSX.writeFile(wb, `TAZAT_Attendance_${safeFileDate}.xlsx`);
+}
+
+async function exportAllDaysExcel(){
+  const log = cachedLog || [];
+  if(log.length === 0){ alert('No data to export'); return; }
+  const groups = groupByDate(log);
+  const wb = XLSX.utils.book_new();
+  Object.keys(groups).sort((a,b)=>{
+    const [da,ma,ya] = a.split('/'); const [db,mb,yb] = b.split('/');
+    return new Date(ya,ma-1,da) - new Date(yb,mb-1,db);
+  }).forEach(dateKey=>{
+    const records = groups[dateKey].slice().sort((a,b)=> a.empName.localeCompare(b.empName) || new Date(a.timestamp) - new Date(b.timestamp));
+    const rows = records.map(r=>({
+      "Employee ID": r.empId,
+      "Employee Name": r.empName,
+      "Punch Type": r.type,
+      "Time": r.displayTime,
+      "Latitude": r.lat || '',
+      "Longitude": r.lng || '',
+      "Work Status": r.workStatus || '',
+      "Work Note": r.workNote || ''
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    ws['!cols'] = [{wch:12},{wch:22},{wch:10},{wch:20},{wch:10},{wch:10},{wch:12},{wch:45}];
+    XLSX.utils.book_append_sheet(wb, ws, dateKey.replace(/\//g, '-'));
+  });
+  XLSX.writeFile(wb, 'TAZAT_Attendance_AllDays.xlsx');
+}
+
+async function exportCSV(){
+  const log = cachedLog || [];
+  if(log.length === 0){ alert('No data to export'); return; }
+  let csv = 'Employee ID,Employee Name,Type,Timestamp,Latitude,Longitude,Work Status,Work Note\n';
+  log.forEach(r=>{
+    const note = (r.workNote || '').replace(/"/g, '""');
+    csv += `${r.empId},${r.empName},${r.type},${r.displayTime},${r.lat||''},${r.lng||''},${r.workStatus||''},"${note}"\n`;
+  });
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'TAZAT_attendance_log.csv';
+  a.click();
+}
+
+window.onload = async function(){
+  await loadRoster();
+  requestLocation();
+};
+</script>
+
+</body>
+</html>
