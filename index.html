@@ -331,6 +331,102 @@
     animation:spin 0.7s linear infinite;
   }
   @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* Employee profile card */
+  .emp-card{
+    display:none;
+    align-items:center;
+    gap:12px;
+    padding:14px;
+    background:linear-gradient(135deg, #fff, #fdf8ee);
+    border-radius:12px;
+    margin-bottom:14px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.05);
+  }
+  .emp-card.show{display:flex;}
+  .avatar-circle{
+    width:52px;height:52px;
+    border-radius:50%;
+    background:linear-gradient(135deg, var(--maroon), var(--maroon-dark));
+    color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:17px;
+    flex-shrink:0;
+  }
+  .emp-card-info{flex:1;min-width:0;}
+  .emp-card-greet{font-size:12px;color:#888;}
+  .emp-card-name{font-size:15px;font-weight:800;color:var(--maroon-dark);}
+  .emp-card-id{
+    display:inline-block;
+    margin-top:2px;
+    font-size:10px;
+    font-weight:700;
+    background:var(--gold-light,#e8d6a8);
+    color:var(--maroon-dark);
+    padding:2px 8px;
+    border-radius:8px;
+  }
+  .emp-card-date{
+    text-align:right;
+    font-size:11px;
+    color:#888;
+    flex-shrink:0;
+  }
+  .emp-card-date b{display:block;font-size:12px;color:#444;}
+
+  /* Working banner with live timer */
+  .working-banner{
+    display:none;
+    justify-content:space-between;
+    align-items:center;
+    background:linear-gradient(135deg, #e7f5e9, #d9f0dd);
+    border-radius:12px;
+    padding:14px 16px;
+    margin-bottom:14px;
+    box-shadow:0 2px 10px rgba(47,143,78,0.15);
+  }
+  .working-banner.show{display:flex;}
+  .working-banner .wb-left{display:flex;align-items:center;gap:8px;}
+  .working-banner .wb-dot{
+    width:11px;height:11px;border-radius:50%;background:#2f8f4e;
+    animation:pulseDot 1.6s infinite;
+  }
+  .working-banner .wb-label{font-size:12px;font-weight:700;color:#1e5c30;}
+  .working-banner .wb-since{font-size:10.5px;color:#3d7a4d;}
+  .working-banner .wb-timer{text-align:right;}
+  .working-banner .wb-timer b{display:block;font-size:15px;color:#1e5c30;}
+  .working-banner .wb-timer span{font-size:9.5px;color:#3d7a4d;}
+
+  /* Today's Activity timeline */
+  .activity-card{display:none;margin-top:16px;}
+  .activity-card.show{display:block;}
+  .activity-card h3{font-size:12px;color:#444;margin:0 0 10px;font-weight:700;}
+  .activity-item{
+    display:flex;
+    gap:10px;
+    padding-bottom:14px;
+    position:relative;
+  }
+  .activity-item:not(:last-child)::before{
+    content:'';
+    position:absolute;
+    left:9px;top:22px;bottom:0;
+    width:2px;
+    background:#eee;
+  }
+  .activity-dot{
+    width:20px;height:20px;
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:10px;
+    flex-shrink:0;
+    color:#fff;
+  }
+  .activity-dot.in{background:#2f8f4e;}
+  .activity-dot.out{background:var(--maroon);}
+  .activity-title{font-size:12px;font-weight:700;color:#333;}
+  .activity-sub{font-size:10.5px;color:#888;margin-top:1px;}
+  .activity-time{font-size:10px;color:#aaa;margin-left:auto;white-space:nowrap;padding-left:8px;}
 </style>
 </head>
 <body>
@@ -350,6 +446,30 @@
 </div>
 
 <div class="panel" id="punchPanel">
+
+  <div class="emp-card" id="empCard">
+    <div class="avatar-circle" id="avatarCircle">--</div>
+    <div class="emp-card-info">
+      <div class="emp-card-greet" id="empGreet">Hello</div>
+      <div class="emp-card-name" id="empCardName">—</div>
+      <div class="emp-card-id" id="empCardId">—</div>
+    </div>
+    <div class="emp-card-date" id="empCardDate"></div>
+  </div>
+
+  <div class="working-banner" id="workingBanner">
+    <div class="wb-left">
+      <div class="wb-dot"></div>
+      <div>
+        <div class="wb-label">Currently Working</div>
+        <div class="wb-since" id="wbSince">Since —</div>
+      </div>
+    </div>
+    <div class="wb-timer">
+      <b id="wbTimer">00h 00m</b>
+      <span>Working Time</span>
+    </div>
+  </div>
 
   <div id="desktopFlow" style="display:none;">
     <label>Select Employee</label>
@@ -397,6 +517,11 @@
   </div>
 
   <div class="last-punch" id="lastPunch"></div>
+
+  <div class="activity-card" id="activityCard">
+    <h3>Today's Activity</h3>
+    <div id="activityList"></div>
+  </div>
 </div>
 
 <div class="panel" id="adminPanel" style="display:none;">
@@ -444,7 +569,7 @@
 // SETUP: paste your Google Apps Script Web App URL below.
 // See the setup instructions provided alongside this file.
 // ============================================================
-const API_URL = "https://script.google.com/macros/s/AKfycbzOT5Pc7gDepHBgOkIGD3-CuitEPf1cRC2NCsU8V7XnSebnu5_Hu1Dc5x6WQ9V46qDy/exec";
+const API_URL = "PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE";
 
 let roster = [];
 let cachedLog = [];
@@ -685,6 +810,105 @@ function timeGreeting(){
   return 'Good evening';
 }
 
+function getInitials(name){
+  return (name || '?').trim().split(/\s+/).map(w=>w[0].toUpperCase()).slice(0,2).join('');
+}
+
+function formatTodayDate(){
+  const d = new Date();
+  const main = `${d.getDate()} ${d.toLocaleString('en-US',{month:'short'})} ${d.getFullYear()}`;
+  const sub = d.toLocaleString('en-US',{weekday:'long'});
+  return { main, sub };
+}
+
+function showEmployeeCard(emp){
+  document.getElementById('avatarCircle').textContent = getInitials(emp.name);
+  document.getElementById('empGreet').textContent = timeGreeting() + ',';
+  document.getElementById('empCardName').textContent = emp.name;
+  document.getElementById('empCardId').textContent = emp.id;
+  const d = formatTodayDate();
+  document.getElementById('empCardDate').innerHTML = `<b>${d.main}</b>${d.sub}`;
+  document.getElementById('empCard').classList.add('show');
+}
+
+function hideEmployeeCard(){
+  document.getElementById('empCard').classList.remove('show');
+  stopWorkTimer();
+  document.getElementById('activityCard').classList.remove('show');
+}
+
+let workTimerInterval = null;
+function startWorkTimer(isoTimestamp, displaySince){
+  stopWorkTimer();
+  document.getElementById('wbSince').textContent = 'Since ' + (displaySince || '—');
+  document.getElementById('workingBanner').classList.add('show');
+  function update(){
+    const startMs = new Date(isoTimestamp).getTime();
+    const diff = Math.max(0, Date.now() - startMs);
+    const hours = Math.floor(diff / 3600000);
+    const mins = Math.floor((diff % 3600000) / 60000);
+    document.getElementById('wbTimer').textContent =
+      `${String(hours).padStart(2,'0')}h ${String(mins).padStart(2,'0')}m`;
+  }
+  update();
+  workTimerInterval = setInterval(update, 30000);
+}
+function stopWorkTimer(){
+  if(workTimerInterval) clearInterval(workTimerInterval);
+  workTimerInterval = null;
+  document.getElementById('workingBanner').classList.remove('show');
+}
+
+async function renderTodayActivity(empId){
+  const card = document.getElementById('activityCard');
+  const list = document.getElementById('activityList');
+  card.classList.add('show');
+  list.innerHTML = '<div class="loading">Loading…</div>';
+
+  const log = await apiCall({action:'getLog'}) || [];
+  const todayStr = new Date().toLocaleDateString('en-IN');
+  let todays = log.filter(r => r.empId === empId && r.displayTime && r.displayTime.split(',')[0].trim() === todayStr);
+  todays = todays.slice().reverse(); // chronological, oldest first
+
+  if(todays.length === 0){
+    list.innerHTML = '<div class="loading">No activity yet today.</div>';
+    return;
+  }
+
+  list.innerHTML = todays.map(r=>{
+    const isIn = r.type === 'IN';
+    const title = isIn ? 'Punched In' : 'Punched Out';
+    const sub = isIn
+      ? (r.lat ? 'Location verified' : 'No location captured')
+      : (r.workNote ? (r.workNote.length > 50 ? r.workNote.slice(0,50)+'…' : r.workNote) : 'Work update added');
+    const timePart = r.displayTime.split(',')[1] ? r.displayTime.split(',')[1].trim() : r.displayTime;
+    return `
+      <div class="activity-item">
+        <div class="activity-dot ${isIn?'in':'out'}">${isIn?'✓':'⏱'}</div>
+        <div>
+          <div class="activity-title">${title}</div>
+          <div class="activity-sub">${sub}</div>
+        </div>
+        <div class="activity-time">${timePart}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// Unified refresh used by both desktop (name-select) and mobile (scan) identification paths
+async function refreshEmployeeUI(empId, empName){
+  if(!empId) return;
+  const emp = roster.find(e => e.id === empId) || {id: empId, name: empName};
+  showEmployeeCard(emp);
+  const status = await apiCall({action:'getStatus', empId});
+  if(status && status.lastType === 'IN'){
+    startWorkTimer(status.lastTimestamp, status.lastTime);
+  } else {
+    stopWorkTimer();
+  }
+  await renderTodayActivity(empId);
+}
+
 let scanning = false;
 let lastScanCode = null;
 let lastScanTime = 0;
@@ -771,6 +995,7 @@ async function onScanDetected(result){
 async function identifyEmployeeAndPunch(empId, empName){
   pendingPunch = {empId, empName};
   const statusEl = document.getElementById('scanStatus');
+  await refreshEmployeeUI(empId, empName);
   const status = await apiCall({action:'getStatus', empId});
   if(!status){
     statusEl.textContent = 'Could not check status — try scanning again';
@@ -799,6 +1024,7 @@ async function onEmployeeChange(){
     statusBox.style.display = 'none';
     btnIn.disabled = !gpsReady;
     btnOut.disabled = !gpsReady;
+    hideEmployeeCard();
     return;
   }
 
@@ -823,6 +1049,9 @@ async function onEmployeeChange(){
     btnIn.disabled = !gpsReady;
     btnOut.disabled = true;
   }
+
+  const emp = roster.find(e => e.id === empId);
+  if(emp) await refreshEmployeeUI(empId, emp.name);
 }
 
 async function startPunch(type){
@@ -958,7 +1187,8 @@ async function savePunch(type, status, note){
     document.getElementById('lastPunch').textContent = 'Failed to save punch — check your internet connection and try again';
   }
 
-  await onEmployeeChange(); // refresh status + button states
+  await onEmployeeChange(); // refresh desktop status + button states (no-op if on mobile flow)
+  await refreshEmployeeUI(pendingPunch.empId, pendingPunch.empName); // refresh timer + activity feed either way
 }
 
 async function loadLog(){
