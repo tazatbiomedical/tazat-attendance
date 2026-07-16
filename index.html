@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TAZAT Biomedical - Attendance</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
 <style>
   :root{
     --maroon:#7a1626;
@@ -230,12 +231,27 @@
 </div>
 
 <div class="panel" id="punchPanel">
-  <label>Select Employee</label>
-  <select id="empSelect"><option value="">Loading roster…</option></select>
+
+  <div id="desktopFlow" style="display:none;">
+    <label>Select Employee</label>
+    <select id="empSelect" onchange="onEmployeeChange()"><option value="">Loading roster…</option></select>
+    <div class="status-box" id="empStatus" style="display:none;"></div>
+    <p style="text-align:right;margin:4px 0 0;">
+      <a href="#" onclick="changePinFlow(); return false;" style="font-size:11px;color:#7a1626;">Change my PIN</a>
+    </p>
+  </div>
+
+  <div id="mobileFlow" style="display:none;">
+    <label>Scan your ID card barcode</label>
+    <div id="scannerWrap" style="display:none;position:relative;border-radius:8px;overflow:hidden;border:2px solid var(--gold);min-height:200px;"></div>
+    <button class="btn-in" id="btnStartScan" onclick="startScan()" style="width:100%;">Start Scanning</button>
+    <button class="btn-out" id="btnStopScan" onclick="stopScan()" style="width:100%;display:none;">Stop Scanning</button>
+    <div class="status-box" id="scanStatus" style="display:none;"></div>
+  </div>
 
   <div class="status-box" id="locStatus">Location: waiting for permission…</div>
 
-  <div class="btn-row">
+  <div class="btn-row" id="manualBtnRow">
     <button class="btn-in" id="btnIn" onclick="startPunch('IN')">Punch IN</button>
     <button class="btn-out" id="btnOut" onclick="startPunch('OUT')">Punch OUT</button>
   </div>
@@ -256,6 +272,7 @@
 
 <div class="panel" id="adminPanel" style="display:none;">
 
+
   <div class="pin-gate" id="pinGate">
     <p style="font-size:13px;color:#555;">Enter Admin PIN to view attendance data</p>
     <input type="password" id="adminPinInput" maxlength="4" placeholder="****">
@@ -272,14 +289,15 @@
       <input id="newEmpId" placeholder="Employee ID" style="max-width:100px;">
     </div>
     <button class="small-btn" onclick="addEmployee()">+ Add Employee</button>
+    <p style="font-size:11px;color:#888;margin-top:4px;">No PIN needed here — the employee sets their own PIN the first time they punch in.</p>
     <div class="roster-list" id="rosterList"></div>
 
     <label style="margin-top:20px;">Daily Records → Excel</label>
     <button class="small-btn" onclick="exportAllDaysExcel()">Export All Days (one workbook, one tab per day)</button>
     <div id="dailyExportWrap" class="loading">Loading dates…</div>
 
-    <label style="margin-top:20px;">Full Attendance Log (latest 100)</label>
-    <button class="small-btn" onclick="exportCSV()">Export Full Log (CSV)</button>
+    <label style="margin-top:20px;">Completed Shifts (In/Out paired, with hours)</label>
+    <button class="small-btn" onclick="exportCSV()">Export Full Summary (CSV)</button>
     <div id="logTableWrap" class="loading">Loading log…</div>
   </div>
 </div>
@@ -289,13 +307,13 @@
 // SETUP: paste your Google Apps Script Web App URL below.
 // See the setup instructions provided alongside this file.
 // ============================================================
-const API_URL = "https://script.google.com/macros/s/AKfycbw9sDgBtSGCoU89E1CvFA_DvWIXTlf_87d0E7XuhwrG_6Jr-kK4rNpcuSvbS7HzBNpl/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbzOT5Pc7gDepHBgOkIGD3-CuitEPf1cRC2NCsU8V7XnSebnu5_Hu1Dc5x6WQ9V46qDy/exec";
 
 let roster = [];
 let cachedLog = [];
 let currentCoords = null;
 let pendingPunch = null; // {empId, empName}
-const ADMIN_PIN = "5055"; // change this to your own 4-digit PIN
+const ADMIN_PIN = "1234"; // change this to your own 4-digit PIN
 let adminUnlocked = false;
 
 function apiConfigured(){
@@ -354,9 +372,22 @@ function renderRosterList(){
   wrap.innerHTML = roster.map(e => `
     <div class="roster-item">
       <span>${e.name} (${e.id})</span>
-      <button class="del-btn" onclick="deleteEmployee('${e.id}')">Delete</button>
+      <span>
+        <button class="small-btn" style="margin-top:0;" onclick="resetPin('${e.id}', '${e.name.replace(/'/g,"\\'")}')">Reset PIN</button>
+        <button class="del-btn" onclick="deleteEmployee('${e.id}')">Delete</button>
+      </span>
     </div>
   `).join('');
+}
+
+async function resetPin(empId, empName){
+  if(!confirm(`Reset ${empName}'s PIN? They'll be asked to set a brand new PIN next time they punch in.`)) return;
+  const result = await apiCall({action:'resetPin', empId});
+  if(result && result.success){
+    alert(`${empName}'s PIN has been reset.`);
+  } else {
+    alert('Could not reset PIN — try again');
+  }
 }
 
 async function addEmployee(){
@@ -428,17 +459,218 @@ function requestLocation(){
   );
 }
 
-function startPunch(type){
+function isMobileDevice(){
+  const ua = navigator.userAgent || navigator.vendor || window.opera || "";
+  const uaMobile = /android|iphone|ipad|ipod|iemobile|blackberry|opera mini|mobile/i.test(ua);
+  const touchAndSmall = (('ontouchstart' in window) || navigator.maxTouchPoints > 0) && window.innerWidth <= 1024;
+  return uaMobile || touchAndSmall;
+}
+
+function setupDeviceFlow(){
+  const mobile = isMobileDevice();
+  document.getElementById('desktopFlow').style.display = mobile ? 'none' : 'block';
+  document.getElementById('mobileFlow').style.display = mobile ? 'block' : 'none';
+  document.getElementById('manualBtnRow').style.display = mobile ? 'none' : 'flex';
+}
+
+let scanning = false;
+let lastScanCode = null;
+let lastScanTime = 0;
+
+function startScan(){
+  document.getElementById('scannerWrap').style.display = 'block';
+  document.getElementById('btnStartScan').style.display = 'none';
+  document.getElementById('btnStopScan').style.display = 'block';
+  const statusEl = document.getElementById('scanStatus');
+  statusEl.style.display = 'block';
+  statusEl.className = 'status-box';
+  statusEl.textContent = 'Point the camera at the barcode on your ID card…';
+
+  Quagga.init({
+    inputStream: {
+      type: "LiveStream",
+      target: document.getElementById('scannerWrap'),
+      constraints: { facingMode: "environment" }
+    },
+    decoder: { readers: ["code_128_reader"] },
+    locate: true
+  }, function(err){
+    if(err){
+      statusEl.textContent = 'Camera error: ' + err.message + ' — check camera permission in your browser settings';
+      statusEl.className = 'status-box err';
+      return;
+    }
+    Quagga.start();
+    scanning = true;
+  });
+
+  Quagga.onDetected(onScanDetected);
+}
+
+function stopScan(){
+  if(scanning){
+    Quagga.offDetected(onScanDetected);
+    Quagga.stop();
+    scanning = false;
+  }
+  document.getElementById('scannerWrap').style.display = 'none';
+  document.getElementById('scannerWrap').innerHTML = '';
+  document.getElementById('btnStartScan').style.display = 'block';
+  document.getElementById('btnStopScan').style.display = 'none';
+}
+
+async function onScanDetected(result){
+  const code = result.codeResult.code;
+  const now = Date.now();
+  if(code === lastScanCode && (now - lastScanTime) < 5000) return; // ignore duplicate reads of the same card
+  lastScanCode = code;
+  lastScanTime = now;
+
+  const statusEl = document.getElementById('scanStatus');
+  const emp = roster.find(e => e.id === code);
+  if(!emp){
+    statusEl.textContent = `Scanned "${code}" — not found in the employee roster`;
+    statusEl.className = 'status-box err';
+    return;
+  }
+
+  stopScan();
+  statusEl.textContent = `Identified: ${emp.name} — checking status…`;
+  statusEl.className = 'status-box ok';
+  await identifyEmployeeAndPunch(emp.id, emp.name);
+}
+
+// Shared by the scan flow: figures out whether this is an IN or OUT and acts accordingly
+async function identifyEmployeeAndPunch(empId, empName){
+  pendingPunch = {empId, empName};
+  const statusEl = document.getElementById('scanStatus');
+  const status = await apiCall({action:'getStatus', empId});
+  if(!status){
+    statusEl.textContent = 'Could not check status — try scanning again';
+    statusEl.className = 'status-box err';
+    return;
+  }
+  if(status.lastType === 'IN'){
+    statusEl.textContent = `${empName}: currently punched IN — add your work update below to punch out`;
+    statusEl.className = 'status-box ok';
+    document.getElementById('outDetails').classList.add('show');
+    document.getElementById('workNote').focus();
+  } else {
+    await savePunch('IN', null, null);
+    statusEl.textContent = `✓ Punched IN for ${empName}`;
+    statusEl.className = 'status-box ok';
+  }
+}
+
+async function onEmployeeChange(){
+  const empId = document.getElementById('empSelect').value;
+  const statusBox = document.getElementById('empStatus');
+  const btnIn = document.getElementById('btnIn');
+  const btnOut = document.getElementById('btnOut');
+
+  if(!empId){
+    statusBox.style.display = 'none';
+    btnIn.disabled = false;
+    btnOut.disabled = false;
+    return;
+  }
+
+  statusBox.style.display = 'block';
+  statusBox.className = 'status-box';
+  statusBox.textContent = 'Checking status…';
+
+  const status = await apiCall({action:'getStatus', empId});
+  if(!status){
+    statusBox.textContent = 'Could not check status — try again';
+    return;
+  }
+
+  if(status.lastType === 'IN'){
+    statusBox.textContent = `Currently punched IN since ${status.lastTime}`;
+    statusBox.className = 'status-box ok';
+    btnIn.disabled = true;
+    btnOut.disabled = false;
+  } else {
+    statusBox.textContent = status.lastTime ? `Last punched OUT at ${status.lastTime}` : 'Not punched in yet today';
+    statusBox.className = 'status-box';
+    btnIn.disabled = false;
+    btnOut.disabled = true;
+  }
+}
+
+async function startPunch(type){
   const empId = document.getElementById('empSelect').value;
   if(!empId){ alert('Select your name first'); return; }
   const emp = roster.find(e => e.id === empId);
+
+  const pinOk = await ensurePinReady(emp.id, emp.name);
+  if(!pinOk) return;
+
   pendingPunch = {empId: emp.id, empName: emp.name};
 
   if(type === 'IN'){
-    savePunch('IN', null, null);
+    await savePunch('IN', null, null);
   } else {
     document.getElementById('outDetails').classList.add('show');
     document.getElementById('workNote').focus();
+  }
+}
+
+// Handles both "first time — set a PIN" and "already have one — verify it" cases.
+// Returns true if the employee is cleared to punch, false if they cancelled or failed.
+async function ensurePinReady(empId, empName){
+  const hasPinResult = await apiCall({action:'hasPin', empId});
+  if(!hasPinResult){ alert('Could not reach the server — check your internet connection.'); return false; }
+
+  if(!hasPinResult.hasPin){
+    alert(`Welcome ${empName}! You don't have a PIN set yet — let's create one now. This will be your PIN going forward.`);
+    const p1 = prompt('Create a 4-digit PIN:');
+    if(p1 === null) return false;
+    if(!/^\d{4}$/.test(p1)){ alert('PIN must be exactly 4 digits. Try punching again to retry.'); return false; }
+    const p2 = prompt('Enter the same PIN again to confirm:');
+    if(p2 === null) return false;
+    if(p1 !== p2){ alert('PINs did not match. Try punching again to retry.'); return false; }
+    const result = await apiCall({action:'setPin', empId, newPin: p1});
+    if(!result || !result.success){ alert(result && result.error ? result.error : 'Could not save PIN — try again.'); return false; }
+    alert('PIN created! Proceeding with your punch now.');
+    return true;
+  }
+
+  const pin = prompt(`Enter ${empName}'s 4-digit PIN to confirm it's really you:`);
+  if(pin === null) return false;
+  const check = await apiCall({action:'verifyPin', empId, pin});
+  if(!check || !check.valid){
+    alert('Incorrect PIN — punch not recorded.');
+    return false;
+  }
+  return true;
+}
+
+async function changePinFlow(){
+  const empId = document.getElementById('empSelect').value;
+  if(!empId){ alert('Select your name first'); return; }
+  const emp = roster.find(e => e.id === empId);
+
+  const hasPinResult = await apiCall({action:'hasPin', empId});
+  if(!hasPinResult || !hasPinResult.hasPin){
+    alert("You haven't set a PIN yet — just punch IN or OUT and you'll be guided through creating one.");
+    return;
+  }
+
+  const oldPin = prompt(`Enter your CURRENT PIN, ${emp.name}:`);
+  if(oldPin === null) return;
+  const newPin1 = prompt('Enter your NEW 4-digit PIN:');
+  if(newPin1 === null) return;
+  if(!/^\d{4}$/.test(newPin1)){ alert('New PIN must be exactly 4 digits.'); return; }
+  const newPin2 = prompt('Enter the new PIN again to confirm:');
+  if(newPin2 === null) return;
+  if(newPin1 !== newPin2){ alert('New PINs did not match — try again.'); return; }
+
+  const result = await apiCall({action:'changePin', empId, oldPin, newPin: newPin1});
+  if(result && result.success){
+    alert('PIN changed successfully.');
+  } else {
+    alert(result && result.error ? result.error : 'Could not change PIN — try again.');
   }
 }
 
@@ -474,12 +706,15 @@ async function savePunch(type, status, note){
 
   const result = await apiCall({action:'addPunch', ...record});
 
-  document.getElementById('btnIn').disabled = false;
-  document.getElementById('btnOut').disabled = false;
+  if(result && result.success === false){
+    document.getElementById('lastPunch').textContent = '✗ ' + (result.error || 'Punch rejected');
+  } else {
+    document.getElementById('lastPunch').textContent = result
+      ? `✓ Punched ${type} for ${record.empName} at ${record.displayTime}${currentCoords ? ' ('+currentCoords.lat+', '+currentCoords.lng+')' : ' (no GPS)'}`
+      : 'Failed to save punch — check your internet connection and try again';
+  }
 
-  document.getElementById('lastPunch').textContent = result
-    ? `✓ Punched ${type} for ${record.empName} at ${record.displayTime}${currentCoords ? ' ('+currentCoords.lat+', '+currentCoords.lng+')' : ' (no GPS)'}`
-    : 'Failed to save punch — check your internet connection and try again';
+  await onEmployeeChange(); // refresh status + button states
 }
 
 async function loadLog(){
@@ -490,55 +725,51 @@ async function loadLog(){
     document.getElementById('dailyExportWrap').innerHTML = '';
     return;
   }
-  const log = await apiCall({action:'getLog'}) || [];
-  cachedLog = log;
-  if(log.length === 0){
-    wrap.innerHTML = '<div class="loading">No punches yet.</div>';
-    document.getElementById('dailyExportWrap').innerHTML = '<div class="loading">No punches yet.</div>';
+  const summary = await apiCall({action:'getSummary'}) || [];
+  cachedLog = summary;
+  if(summary.length === 0){
+    wrap.innerHTML = '<div class="loading">No completed shifts yet — shows up here once someone punches OUT.</div>';
+    document.getElementById('dailyExportWrap').innerHTML = '<div class="loading">No completed shifts yet.</div>';
     return;
   }
-  let html = '<table><tr><th>Employee</th><th>Type</th><th>Time</th><th>Location</th><th>Status</th><th>Work Note</th></tr>';
-  log.forEach(r=>{
+  let html = '<table><tr><th>Date</th><th>Employee</th><th>In</th><th>Out</th><th>Hours</th><th>Status</th><th>Work Note</th></tr>';
+  summary.forEach(r=>{
     const badge = r.workStatus ? `<span class="badge ${r.workStatus.toLowerCase()}">${r.workStatus}</span>` : '—';
-    html += `<tr><td>${r.empName}</td><td>${r.type}</td><td>${r.displayTime}</td><td>${r.lat ? r.lat+', '+r.lng : '—'}</td><td>${badge}</td><td>${r.workNote || '—'}</td></tr>`;
+    html += `<tr><td>${r.date}</td><td>${r.empName}</td><td>${r.inTime}</td><td>${r.outTime}</td><td>${r.hoursWorked || '—'}</td><td>${badge}</td><td>${r.workNote || '—'}</td></tr>`;
   });
   html += '</table>';
   wrap.innerHTML = html;
 
-  renderDailyExport(log);
+  renderDailyExport(summary);
 }
 
-// Groups records by calendar date (based on the device's local date at punch time)
-function groupByDate(log){
+// Groups summary rows by their Date field (already computed server-side from the punch-in date)
+function groupByDate(summary){
   const groups = {};
-  log.forEach(r=>{
-    const d = new Date(r.timestamp);
-    const dateKey = d.toLocaleDateString('en-IN', {year:'numeric', month:'2-digit', day:'2-digit'}); // DD/MM/YYYY
+  summary.forEach(r=>{
+    const dateKey = r.date || 'Unknown date';
     if(!groups[dateKey]) groups[dateKey] = [];
     groups[dateKey].push(r);
   });
   return groups;
 }
 
-function renderDailyExport(log){
+function renderDailyExport(summary){
   const wrap = document.getElementById('dailyExportWrap');
-  const groups = groupByDate(log);
-  const todayKey = new Date().toLocaleDateString('en-IN', {year:'numeric', month:'2-digit', day:'2-digit'});
+  const groups = groupByDate(summary);
   const dates = Object.keys(groups).sort((a,b)=>{
-    // sort dates descending (parse DD/MM/YYYY)
     const [da,ma,ya] = a.split('/'); const [db,mb,yb] = b.split('/');
     return new Date(yb,mb-1,db) - new Date(ya,ma-1,da);
   });
 
   wrap.innerHTML = dates.map(dateKey=>{
     const records = groups[dateKey];
-    const isToday = dateKey === todayKey;
     const empCount = new Set(records.map(r=>r.empId)).size;
     return `
       <div class="roster-item">
         <span>
-          <b>${dateKey}</b> ${isToday ? '<span class="badge pending">Today · still open</span>' : '<span class="badge completed">Day closed</span>'}
-          <br><span style="color:#888;">${records.length} punches · ${empCount} employees</span>
+          <b>${dateKey}</b>
+          <br><span style="color:#888;">${records.length} completed shifts · ${empCount} employees</span>
         </span>
         <button class="small-btn" onclick="exportDayExcel('${dateKey}')">Export .xlsx</button>
       </div>
@@ -547,81 +778,75 @@ function renderDailyExport(log){
 }
 
 function exportDayExcel(dateKey){
-  const log = cachedLog || [];
-  const groups = groupByDate(log);
+  const summary = cachedLog || [];
+  const groups = groupByDate(summary);
   const records = groups[dateKey] || [];
   if(records.length === 0){ alert('No records for this date'); return; }
 
-  // sort by employee then time for readability
-  records.sort((a,b)=> a.empName.localeCompare(b.empName) || new Date(a.timestamp) - new Date(b.timestamp));
+  records.sort((a,b)=> a.empName.localeCompare(b.empName));
 
   const rows = records.map(r=>({
     "Employee ID": r.empId,
     "Employee Name": r.empName,
-    "Punch Type": r.type,
-    "Time": r.displayTime,
-    "Latitude": r.lat || '',
-    "Longitude": r.lng || '',
+    "Punch In": r.inTime,
+    "Punch Out": r.outTime,
+    "Hours Worked": r.hoursWorked,
     "Work Status": r.workStatus || '',
     "Work Note": r.workNote || ''
   }));
 
   const ws = XLSX.utils.json_to_sheet(rows);
-  ws['!cols'] = [
-    {wch:12},{wch:22},{wch:10},{wch:20},{wch:10},{wch:10},{wch:12},{wch:45}
-  ];
+  ws['!cols'] = [{wch:12},{wch:22},{wch:20},{wch:20},{wch:12},{wch:12},{wch:45}];
   const wb = XLSX.utils.book_new();
   const safeSheetName = dateKey.replace(/\//g, '-');
   XLSX.utils.book_append_sheet(wb, ws, safeSheetName);
-
-  const safeFileDate = dateKey.replace(/\//g, '-');
-  XLSX.writeFile(wb, `TAZAT_Attendance_${safeFileDate}.xlsx`);
+  XLSX.writeFile(wb, `TAZAT_Attendance_${safeSheetName}.xlsx`);
 }
 
 async function exportAllDaysExcel(){
-  const log = cachedLog || [];
-  if(log.length === 0){ alert('No data to export'); return; }
-  const groups = groupByDate(log);
+  const summary = cachedLog || [];
+  if(summary.length === 0){ alert('No data to export'); return; }
+  const groups = groupByDate(summary);
   const wb = XLSX.utils.book_new();
   Object.keys(groups).sort((a,b)=>{
     const [da,ma,ya] = a.split('/'); const [db,mb,yb] = b.split('/');
     return new Date(ya,ma-1,da) - new Date(yb,mb-1,db);
   }).forEach(dateKey=>{
-    const records = groups[dateKey].slice().sort((a,b)=> a.empName.localeCompare(b.empName) || new Date(a.timestamp) - new Date(b.timestamp));
+    const records = groups[dateKey].slice().sort((a,b)=> a.empName.localeCompare(b.empName));
     const rows = records.map(r=>({
       "Employee ID": r.empId,
       "Employee Name": r.empName,
-      "Punch Type": r.type,
-      "Time": r.displayTime,
-      "Latitude": r.lat || '',
-      "Longitude": r.lng || '',
+      "Punch In": r.inTime,
+      "Punch Out": r.outTime,
+      "Hours Worked": r.hoursWorked,
       "Work Status": r.workStatus || '',
       "Work Note": r.workNote || ''
     }));
     const ws = XLSX.utils.json_to_sheet(rows);
-    ws['!cols'] = [{wch:12},{wch:22},{wch:10},{wch:20},{wch:10},{wch:10},{wch:12},{wch:45}];
+    ws['!cols'] = [{wch:12},{wch:22},{wch:20},{wch:20},{wch:12},{wch:12},{wch:45}];
     XLSX.utils.book_append_sheet(wb, ws, dateKey.replace(/\//g, '-'));
   });
   XLSX.writeFile(wb, 'TAZAT_Attendance_AllDays.xlsx');
 }
 
 async function exportCSV(){
-  const log = cachedLog || [];
-  if(log.length === 0){ alert('No data to export'); return; }
-  let csv = 'Employee ID,Employee Name,Type,Timestamp,Latitude,Longitude,Work Status,Work Note\n';
-  log.forEach(r=>{
+  const summary = cachedLog || [];
+  if(summary.length === 0){ alert('No data to export'); return; }
+  let csv = 'Date,Employee ID,Employee Name,Punch In,Punch Out,Hours Worked,Work Status,Work Note\n';
+  summary.forEach(r=>{
     const note = (r.workNote || '').replace(/"/g, '""');
-    csv += `${r.empId},${r.empName},${r.type},${r.displayTime},${r.lat||''},${r.lng||''},${r.workStatus||''},"${note}"\n`;
+    csv += `${r.date},${r.empId},${r.empName},${r.inTime},${r.outTime},${r.hoursWorked||''},${r.workStatus||''},"${note}"\n`;
   });
   const blob = new Blob([csv], {type:'text/csv'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'TAZAT_attendance_log.csv';
+  a.download = 'TAZAT_attendance_summary.csv';
   a.click();
 }
 
 window.onload = async function(){
+  setupDeviceFlow();
   await loadRoster();
   requestLocation();
 };
