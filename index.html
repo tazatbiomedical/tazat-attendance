@@ -15,8 +15,8 @@
   }
   *{box-sizing:border-box;}
   body{
-    font-family:Arial, Helvetica, sans-serif;
-    background:var(--cream);
+    font-family:-apple-system, 'Segoe UI', Arial, Helvetica, sans-serif;
+    background:linear-gradient(160deg, #fdf8ee 0%, #f2ece1 55%, #ede6d8 100%);
     margin:0;
     padding:0;
     min-height:100vh;
@@ -28,8 +28,9 @@
     width:100%;
     background:linear-gradient(135deg, var(--maroon), var(--maroon-dark));
     color:#fff;
-    padding:16px 20px;
+    padding:18px 20px;
     text-align:center;
+    box-shadow:0 2px 12px rgba(122,22,38,0.25);
   }
   header h1{margin:0;font-size:17px;letter-spacing:0.5px;}
   header p{margin:3px 0 0;font-size:11px;color:var(--gold);}
@@ -38,31 +39,38 @@
     display:flex;
     width:100%;
     max-width:480px;
-    margin-top:14px;
+    margin-top:16px;
+    background:#fff;
+    border-radius:10px;
+    padding:4px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.06);
   }
   .tab{
     flex:1;
     text-align:center;
     padding:9px;
-    background:#eee;
+    background:transparent;
+    border-radius:8px;
     font-size:12px;
     font-weight:700;
-    color:#666;
+    color:#999;
     cursor:pointer;
-    border-bottom:3px solid transparent;
+    transition:all 0.2s ease;
   }
   .tab.active{
-    background:#fff;
-    color:var(--maroon);
-    border-bottom:3px solid var(--gold);
+    background:linear-gradient(135deg, var(--maroon), var(--maroon-dark));
+    color:#fff;
   }
 
   .panel{
     width:100%;
     max-width:480px;
     background:#fff;
-    padding:20px;
+    padding:22px;
     flex:1;
+    border-radius:14px;
+    margin-top:14px;
+    box-shadow:0 4px 18px rgba(0,0,0,0.06);
   }
 
   label{
@@ -83,14 +91,40 @@
   textarea{resize:vertical;min-height:60px;}
   .status-box{
     margin-top:14px;
-    padding:10px 12px;
-    border-radius:6px;
+    padding:12px 14px;
+    border-radius:10px;
     background:#f5f0e2;
     font-size:12px;
     color:#555;
     line-height:1.5;
+    transition:all 0.25s ease;
   }
-  .status-box.ok{background:#e7f5e9;color:#256029;}
+  .status-box.ok{
+    background:linear-gradient(135deg, #e7f5e9, #d9f0dd);
+    color:#1e5c30;
+    font-weight:700;
+    font-size:13px;
+    padding:14px 16px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    box-shadow:0 2px 10px rgba(47,143,78,0.15);
+  }
+  .status-box.ok::before{
+    content:'';
+    width:11px;
+    height:11px;
+    border-radius:50%;
+    background:#2f8f4e;
+    flex-shrink:0;
+    box-shadow:0 0 0 rgba(47,143,78,0.5);
+    animation:pulseDot 1.6s infinite;
+  }
+  @keyframes pulseDot{
+    0%{box-shadow:0 0 0 0 rgba(47,143,78,0.5);}
+    70%{box-shadow:0 0 0 8px rgba(47,143,78,0);}
+    100%{box-shadow:0 0 0 0 rgba(47,143,78,0);}
+  }
   .status-box.err{background:#fbe7e7;color:#8a1f1f;}
 
   .btn-row{
@@ -212,6 +246,91 @@
     letter-spacing:4px;
     font-size:18px;
   }
+
+  /* Greeting / Thank-you modal */
+  .modal-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(30,15,15,0.55);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:999;
+    opacity:0;
+    transition:opacity 0.25s ease;
+  }
+  .modal-overlay.show{display:flex;opacity:1;}
+  .modal-card{
+    background:#fff;
+    border-radius:18px;
+    padding:36px 28px;
+    text-align:center;
+    max-width:320px;
+    width:88%;
+    box-shadow:0 20px 50px rgba(0,0,0,0.3);
+    transform:scale(0.85);
+    transition:transform 0.25s ease;
+  }
+  .modal-overlay.show .modal-card{transform:scale(1);}
+  .modal-icon{font-size:44px;margin-bottom:10px;}
+  .modal-title{font-size:19px;font-weight:800;color:var(--maroon-dark);margin-bottom:6px;}
+  .modal-sub{font-size:13px;color:#666;line-height:1.5;}
+
+  /* Scan overlay */
+  .scan-frame{
+    position:absolute;
+    top:14%;left:14%;right:14%;bottom:14%;
+    pointer-events:none;
+    z-index:5;
+  }
+  .scan-frame .corner{
+    position:absolute;
+    width:24px;height:24px;
+    border:3px solid var(--gold);
+  }
+  .scan-frame .tl{top:0;left:0;border-right:none;border-bottom:none;border-radius:6px 0 0 0;}
+  .scan-frame .tr{top:0;right:0;border-left:none;border-bottom:none;border-radius:0 6px 0 0;}
+  .scan-frame .bl{bottom:0;left:0;border-right:none;border-top:none;border-radius:0 0 0 6px;}
+  .scan-frame .br{bottom:0;right:0;border-left:none;border-top:none;border-radius:0 0 6px 0;}
+  .scan-line{
+    position:absolute;
+    left:14%;right:14%;
+    top:14%;
+    height:2px;
+    background:linear-gradient(90deg, transparent, #ff3b3b, transparent);
+    z-index:5;
+    animation:scanSweep 2s ease-in-out infinite;
+  }
+  @keyframes scanSweep{
+    0%{top:14%;}
+    50%{top:82%;}
+    100%{top:14%;}
+  }
+  .torch-btn{
+    position:absolute;
+    bottom:10px;right:10px;
+    width:auto;
+    flex:none;
+    background:rgba(0,0,0,0.5);
+    color:#fff;
+    padding:8px 12px;
+    font-size:11px;
+    border-radius:20px;
+    z-index:6;
+  }
+  .processing-text{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+  }
+  .spinner{
+    width:14px;height:14px;
+    border:2px solid rgba(255,255,255,0.4);
+    border-top-color:#fff;
+    border-radius:50%;
+    animation:spin 0.7s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
 </style>
 </head>
 <body>
@@ -239,21 +358,31 @@
     <p style="text-align:right;margin:4px 0 0;">
       <a href="#" onclick="changePinFlow(); return false;" style="font-size:11px;color:#7a1626;">Change my PIN</a>
     </p>
+    <p id="backToScanLink" style="display:none;text-align:center;margin:10px 0 0;">
+      <a href="#" onclick="backToScan(); return false;" style="font-size:12px;color:#7a1626;font-weight:700;">📷 Back to scanning</a>
+    </p>
   </div>
 
   <div id="mobileFlow" style="display:none;">
     <label>Scan your ID card barcode</label>
-    <div id="scannerWrap" style="display:none;position:relative;border-radius:8px;overflow:hidden;border:2px solid var(--gold);min-height:200px;"></div>
-    <button class="btn-in" id="btnStartScan" onclick="startScan()" style="width:100%;">Start Scanning</button>
+    <div id="scannerWrap" style="display:none;position:relative;border-radius:10px;overflow:hidden;border:2px solid var(--gold);min-height:220px;">
+      <div class="scan-frame"><div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div></div>
+      <div class="scan-line"></div>
+      <button type="button" class="torch-btn" id="btnTorch" onclick="toggleTorch()" style="display:none;">🔦 Torch</button>
+    </div>
+    <button class="btn-in" id="btnStartScan" onclick="startScan()" style="width:100%;" disabled>Start Scanning</button>
     <button class="btn-out" id="btnStopScan" onclick="stopScan()" style="width:100%;display:none;">Stop Scanning</button>
     <div class="status-box" id="scanStatus" style="display:none;"></div>
+    <p style="text-align:center;margin:10px 0 0;">
+      <a href="#" onclick="useFallbackPin(); return false;" style="font-size:12px;color:#7a1626;">📵 Camera not working? Use PIN instead</a>
+    </p>
   </div>
 
   <div class="status-box" id="locStatus">Location: waiting for permission…</div>
 
   <div class="btn-row" id="manualBtnRow">
-    <button class="btn-in" id="btnIn" onclick="startPunch('IN')">Punch IN</button>
-    <button class="btn-out" id="btnOut" onclick="startPunch('OUT')">Punch OUT</button>
+    <button class="btn-in" id="btnIn" onclick="startPunch('IN')" disabled>Punch IN</button>
+    <button class="btn-out" id="btnOut" onclick="startPunch('OUT')" disabled>Punch OUT</button>
   </div>
 
   <div id="outDetails">
@@ -264,7 +393,7 @@
     </select>
     <label>What work was done?</label>
     <textarea id="workNote" placeholder="e.g. Calibrated 3 ventilators at City Hospital, pending 2 more tomorrow"></textarea>
-    <button class="btn-out" style="margin-top:12px;" onclick="confirmPunchOut()">Confirm Punch OUT</button>
+    <button class="btn-out" id="btnConfirmOut" style="margin-top:12px;" onclick="confirmPunchOut()">Confirm Punch OUT</button>
   </div>
 
   <div class="last-punch" id="lastPunch"></div>
@@ -299,6 +428,14 @@
     <label style="margin-top:20px;">Completed Shifts (In/Out paired, with hours)</label>
     <button class="small-btn" onclick="exportCSV()">Export Full Summary (CSV)</button>
     <div id="logTableWrap" class="loading">Loading log…</div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="greetModal" onclick="this.classList.remove('show')">
+  <div class="modal-card">
+    <div class="modal-icon" id="greetIcon">👋</div>
+    <div class="modal-title" id="greetTitle">Good morning!</div>
+    <div class="modal-sub" id="greetSub">Have a great day at work.</div>
   </div>
 </div>
 
@@ -437,26 +574,52 @@ function checkPin(){
   }
 }
 
+let gpsReady = false;
+
 function requestLocation(){
   const statusEl = document.getElementById('locStatus');
+  statusEl.textContent = '📍 Getting your location… please wait';
+
   if(!navigator.geolocation){
     statusEl.textContent = 'Location: not supported on this browser';
     statusEl.className = 'status-box err';
+    unlockPunchUI(); // don't trap the employee forever
     return;
   }
+
+  // Safety net: unlock after 10s even if GPS never resolves, so nobody gets stuck
+  const fallbackTimer = setTimeout(()=>{
+    if(!gpsReady){
+      statusEl.textContent = '⚠️ Continuing without location — GPS took too long';
+      statusEl.className = 'status-box err';
+      unlockPunchUI();
+    }
+  }, 10000);
+
   navigator.geolocation.getCurrentPosition(
     (pos)=>{
+      clearTimeout(fallbackTimer);
       currentCoords = {lat: pos.coords.latitude.toFixed(5), lng: pos.coords.longitude.toFixed(5)};
       statusEl.textContent = `Location captured: ${currentCoords.lat}, ${currentCoords.lng}`;
       statusEl.className = 'status-box ok';
+      unlockPunchUI();
     },
     (err)=>{
+      clearTimeout(fallbackTimer);
       statusEl.textContent = 'Location: permission denied — punch will be logged without GPS';
       statusEl.className = 'status-box err';
       currentCoords = null;
+      unlockPunchUI();
     },
     {enableHighAccuracy:true, timeout:8000}
   );
+}
+
+function unlockPunchUI(){
+  gpsReady = true;
+  const scanBtn = document.getElementById('btnStartScan');
+  if(scanBtn) scanBtn.disabled = false;
+  onEmployeeChange(); // re-applies correct IN/OUT button state now that GPS gate is lifted
 }
 
 function isMobileDevice(){
@@ -473,11 +636,61 @@ function setupDeviceFlow(){
   document.getElementById('manualBtnRow').style.display = mobile ? 'none' : 'flex';
 }
 
+function useFallbackPin(){
+  stopScan();
+  document.getElementById('mobileFlow').style.display = 'none';
+  document.getElementById('desktopFlow').style.display = 'block';
+  document.getElementById('manualBtnRow').style.display = 'flex';
+  document.getElementById('backToScanLink').style.display = 'block';
+}
+
+function backToScan(){
+  document.getElementById('desktopFlow').style.display = 'none';
+  document.getElementById('manualBtnRow').style.display = 'none';
+  document.getElementById('backToScanLink').style.display = 'none';
+  document.getElementById('mobileFlow').style.display = 'block';
+}
+
+let torchOn = false;
+async function toggleTorch(){
+  if(!window._quaggaTrack) return;
+  try{
+    torchOn = !torchOn;
+    await window._quaggaTrack.applyConstraints({ advanced: [{ torch: torchOn }] });
+    document.getElementById('btnTorch').textContent = torchOn ? '🔦 Torch On' : '🔦 Torch';
+  }catch(e){
+    console.warn('Torch not supported on this device', e);
+  }
+}
+
+function vibrateDevice(pattern){
+  if(navigator.vibrate){ navigator.vibrate(pattern); }
+}
+
+function showModal(icon, title, sub, autoCloseMs){
+  const modal = document.getElementById('greetModal');
+  document.getElementById('greetIcon').textContent = icon;
+  document.getElementById('greetTitle').textContent = title;
+  document.getElementById('greetSub').textContent = sub;
+  modal.classList.add('show');
+  if(autoCloseMs){
+    setTimeout(()=>{ modal.classList.remove('show'); }, autoCloseMs);
+  }
+}
+
+function timeGreeting(){
+  const h = new Date().getHours();
+  if(h < 12) return 'Good morning';
+  if(h < 17) return 'Good afternoon';
+  return 'Good evening';
+}
+
 let scanning = false;
 let lastScanCode = null;
 let lastScanTime = 0;
 
 function startScan(){
+  if(!gpsReady){ alert('Please wait for location to finish loading first.'); return; }
   document.getElementById('scannerWrap').style.display = 'block';
   document.getElementById('btnStartScan').style.display = 'none';
   document.getElementById('btnStopScan').style.display = 'block';
@@ -502,6 +715,16 @@ function startScan(){
     }
     Quagga.start();
     scanning = true;
+
+    // Check if this camera supports a torch, show the button only if so
+    try{
+      const track = Quagga.CameraAccess.getActiveTrack();
+      window._quaggaTrack = track;
+      const caps = track && track.getCapabilities ? track.getCapabilities() : {};
+      if(caps && caps.torch){
+        document.getElementById('btnTorch').style.display = 'block';
+      }
+    }catch(e){ /* torch not available, ignore */ }
   });
 
   Quagga.onDetected(onScanDetected);
@@ -514,9 +737,11 @@ function stopScan(){
     scanning = false;
   }
   document.getElementById('scannerWrap').style.display = 'none';
-  document.getElementById('scannerWrap').innerHTML = '';
+  document.getElementById('scannerWrap').innerHTML = '<div class="scan-frame"><div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div></div><div class="scan-line"></div><button type="button" class="torch-btn" id="btnTorch" onclick="toggleTorch()" style="display:none;">🔦 Torch</button>';
   document.getElementById('btnStartScan').style.display = 'block';
   document.getElementById('btnStopScan').style.display = 'none';
+  torchOn = false;
+  window._quaggaTrack = null;
 }
 
 async function onScanDetected(result){
@@ -529,11 +754,13 @@ async function onScanDetected(result){
   const statusEl = document.getElementById('scanStatus');
   const emp = roster.find(e => e.id === code);
   if(!emp){
+    vibrateDevice(100);
     statusEl.textContent = `Scanned "${code}" — not found in the employee roster`;
     statusEl.className = 'status-box err';
     return;
   }
 
+  vibrateDevice([60, 40, 60]); // short-pause-short confirms a good read
   stopScan();
   statusEl.textContent = `Identified: ${emp.name} — checking status…`;
   statusEl.className = 'status-box ok';
@@ -570,8 +797,8 @@ async function onEmployeeChange(){
 
   if(!empId){
     statusBox.style.display = 'none';
-    btnIn.disabled = false;
-    btnOut.disabled = false;
+    btnIn.disabled = !gpsReady;
+    btnOut.disabled = !gpsReady;
     return;
   }
 
@@ -586,14 +813,14 @@ async function onEmployeeChange(){
   }
 
   if(status.lastType === 'IN'){
-    statusBox.textContent = `Currently punched IN since ${status.lastTime}`;
+    statusBox.textContent = `🟢 Currently punched IN since ${status.lastTime}`;
     statusBox.className = 'status-box ok';
     btnIn.disabled = true;
-    btnOut.disabled = false;
+    btnOut.disabled = !gpsReady;
   } else {
     statusBox.textContent = status.lastTime ? `Last punched OUT at ${status.lastTime}` : 'Not punched in yet today';
     statusBox.className = 'status-box';
-    btnIn.disabled = false;
+    btnIn.disabled = !gpsReady;
     btnOut.disabled = true;
   }
 }
@@ -678,7 +905,16 @@ async function confirmPunchOut(){
   const note = document.getElementById('workNote').value.trim();
   if(!note){ alert('Please describe the work done before punching out'); return; }
   const status = document.getElementById('workStatus').value;
+
+  const confirmBtn = document.getElementById('btnConfirmOut');
+  const originalText = confirmBtn.textContent;
+  confirmBtn.disabled = true;
+  confirmBtn.innerHTML = '<span class="processing-text"><span class="spinner"></span> Processing… please wait</span>';
+
   await savePunch('OUT', status, note);
+
+  confirmBtn.disabled = false;
+  confirmBtn.textContent = originalText;
   document.getElementById('outDetails').classList.remove('show');
   document.getElementById('workNote').value = '';
 }
@@ -708,10 +944,18 @@ async function savePunch(type, status, note){
 
   if(result && result.success === false){
     document.getElementById('lastPunch').textContent = '✗ ' + (result.error || 'Punch rejected');
+  } else if(result){
+    document.getElementById('lastPunch').textContent =
+      `✓ Punched ${type} for ${record.empName} at ${record.displayTime}${currentCoords ? ' ('+currentCoords.lat+', '+currentCoords.lng+')' : ' (no GPS)'}`;
+
+    const firstName = record.empName.split(' ')[0];
+    if(type === 'IN'){
+      showModal('👋', `${timeGreeting()}, ${firstName}!`, "You're punched in. Have a great, safe day at work.", 2800);
+    } else {
+      showModal('🙏', `Thank you, ${firstName}!`, 'Thanks for your hard work today. See you next time.', 2800);
+    }
   } else {
-    document.getElementById('lastPunch').textContent = result
-      ? `✓ Punched ${type} for ${record.empName} at ${record.displayTime}${currentCoords ? ' ('+currentCoords.lat+', '+currentCoords.lng+')' : ' (no GPS)'}`
-      : 'Failed to save punch — check your internet connection and try again';
+    document.getElementById('lastPunch').textContent = 'Failed to save punch — check your internet connection and try again';
   }
 
   await onEmployeeChange(); // refresh status + button states
