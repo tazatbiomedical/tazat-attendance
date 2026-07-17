@@ -427,6 +427,43 @@
   .activity-title{font-size:12px;font-weight:700;color:#333;}
   .activity-sub{font-size:10.5px;color:#888;margin-top:1px;}
   .activity-time{font-size:10px;color:#aaa;margin-left:auto;white-space:nowrap;padding-left:8px;}
+
+  /* Running figure animation */
+  .runner-svg{animation:runnerBounce 0.6s ease-in-out infinite;}
+  @keyframes runnerBounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-3px);}}
+  .runner-leg1{transform-origin:20px 24px;animation:legSwingA 0.6s ease-in-out infinite;}
+  .runner-leg2{transform-origin:20px 24px;animation:legSwingB 0.6s ease-in-out infinite;}
+  .runner-arm1{transform-origin:20px 15px;animation:legSwingB 0.6s ease-in-out infinite;}
+  .runner-arm2{transform-origin:20px 15px;animation:legSwingA 0.6s ease-in-out infinite;}
+  @keyframes legSwingA{0%,100%{transform:rotate(-22deg);}50%{transform:rotate(22deg);}}
+  @keyframes legSwingB{0%,100%{transform:rotate(22deg);}50%{transform:rotate(-22deg);}}
+
+  /* Admin live status indicator */
+  .admin-live-dot{
+    display:inline-block;
+    width:7px;height:7px;
+    border-radius:50%;
+    background:#2f8f4e;
+    margin-right:4px;
+    animation:pulseDot 1.6s infinite;
+  }
+
+  /* Mini loading overlay (scan -> form transition) */
+  .mini-loading{
+    display:none;
+    text-align:center;
+    padding:14px;
+    font-size:12px;
+    color:#666;
+  }
+  .mini-loading .spinner{
+    border-top-color:var(--maroon);
+    border-color:rgba(122,22,38,0.2);
+    width:16px;height:16px;
+    display:inline-block;
+    vertical-align:middle;
+    margin-right:8px;
+  }
 </style>
 </head>
 <body>
@@ -465,6 +502,14 @@
         <div class="wb-since" id="wbSince">Since —</div>
       </div>
     </div>
+    <svg class="runner-svg" viewBox="0 0 40 40" width="28" height="28">
+      <circle cx="20" cy="8" r="4" fill="#2f8f4e"/>
+      <line class="runner-body" x1="20" y1="12" x2="20" y2="24" stroke="#2f8f4e" stroke-width="3" stroke-linecap="round"/>
+      <line class="runner-arm1" x1="20" y1="15" x2="14" y2="20" stroke="#2f8f4e" stroke-width="2.5" stroke-linecap="round"/>
+      <line class="runner-arm2" x1="20" y1="15" x2="26" y2="12" stroke="#2f8f4e" stroke-width="2.5" stroke-linecap="round"/>
+      <line class="runner-leg1" x1="20" y1="24" x2="14" y2="34" stroke="#2f8f4e" stroke-width="3" stroke-linecap="round"/>
+      <line class="runner-leg2" x1="20" y1="24" x2="27" y2="30" stroke="#2f8f4e" stroke-width="3" stroke-linecap="round"/>
+    </svg>
     <div class="wb-timer">
       <b id="wbTimer">00h 00m</b>
       <span>Working Time</span>
@@ -478,9 +523,6 @@
     <p style="text-align:right;margin:4px 0 0;">
       <a href="#" onclick="changePinFlow(); return false;" style="font-size:11px;color:#7a1626;">Change my PIN</a>
     </p>
-    <p id="backToScanLink" style="display:none;text-align:center;margin:10px 0 0;">
-      <a href="#" onclick="backToScan(); return false;" style="font-size:12px;color:#7a1626;font-weight:700;">📷 Back to scanning</a>
-    </p>
   </div>
 
   <div id="mobileFlow" style="display:none;">
@@ -492,9 +534,26 @@
     </div>
     <button class="btn-in" id="btnStartScan" onclick="startScan()" style="width:100%;" disabled>Start Scanning</button>
     <button class="btn-out" id="btnStopScan" onclick="stopScan()" style="width:100%;display:none;">Stop Scanning</button>
+    <div class="mini-loading" id="miniLoadingOverlay"><span class="spinner"></span>Loading your details…</div>
     <div class="status-box" id="scanStatus" style="display:none;"></div>
+    <button id="mobileActionBtn" style="width:100%;margin-top:12px;display:none;"></button>
     <p style="text-align:center;margin:10px 0 0;">
-      <a href="#" onclick="useFallbackPin(); return false;" style="font-size:12px;color:#7a1626;">📵 Camera not working? Use PIN instead</a>
+      <a href="#" onclick="openRequestFlow(); return false;" style="font-size:12px;color:#7a1626;">📵 Camera not working? Request Admin Approval</a>
+    </p>
+  </div>
+
+  <div id="requestFlow" style="display:none;">
+    <label>Select your name</label>
+    <select id="requestEmpSelect"><option value="">-- Select your name --</option></select>
+    <button class="btn-in" style="width:100%;margin-top:10px;" onclick="submitAdminRequest()">Request Admin Approval</button>
+    <div class="status-box" id="requestStatus" style="display:none;"></div>
+    <div id="tempPinEntry" style="display:none;margin-top:14px;">
+      <label>Enter the temporary PIN your admin gave you over phone</label>
+      <input id="tempPinInput" maxlength="4" placeholder="4-digit code">
+      <button class="btn-in" style="width:100%;margin-top:10px;" onclick="submitTempPin()">Confirm & Punch</button>
+    </div>
+    <p style="text-align:center;margin:14px 0 0;">
+      <a href="#" onclick="closeRequestFlow(); return false;" style="font-size:12px;color:#7a1626;">📷 Back to scanning</a>
     </p>
   </div>
 
@@ -537,7 +596,13 @@
   </div>
 
   <div id="adminContent" style="display:none;">
-    <label>Manage Roster</label>
+    <div style="text-align:right;">
+      <button class="small-btn" style="background:#c94b4b;color:#fff;" onclick="adminSignOut()">🔒 Sign Out</button>
+    </div>
+    <label>⏳ Pending Punch Requests</label>
+    <div id="pendingRequestsWrap" class="loading">Loading…</div>
+
+    <label style="margin-top:20px;">Manage Roster</label>
     <div class="roster-row">
       <input id="newEmpName" placeholder="Employee name">
       <input id="newEmpId" placeholder="Employee ID" style="max-width:100px;">
@@ -632,16 +697,119 @@ function renderRosterList(){
     return;
   }
   wrap.innerHTML = roster.map(e => `
-    <div class="roster-item">
-      <span>${e.name} (${e.id})</span>
-      <span>
-        <button class="small-btn" style="margin-top:0;" onclick="resetPin('${e.id}', '${e.name.replace(/'/g,"\\'")}')">Reset PIN</button>
-        <button class="del-btn" onclick="deleteEmployee('${e.id}')">Delete</button>
-      </span>
+    <div class="roster-item" style="flex-direction:column;align-items:stretch;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="cursor:pointer;" onclick="toggleAdminActivity('${e.id}')">
+          <b>${e.name}</b> (${e.id})
+          <span id="admin-status-${e.id}" style="display:block;font-size:10px;color:#999;">Checking…</span>
+        </span>
+        <span style="white-space:nowrap;">
+          <button class="small-btn" style="margin-top:0;" onclick="resetPin('${e.id}', '${e.name.replace(/'/g,"\\'")}')">Reset PIN</button>
+          <button class="del-btn" onclick="deleteEmployee('${e.id}')">Delete</button>
+        </span>
+      </div>
+      <div id="admin-activity-${e.id}" style="display:none;margin-top:8px;padding-top:8px;border-top:1px solid #f2f2f2;"></div>
     </div>
   `).join('');
 }
 
+let adminTimerInterval = null;
+
+async function refreshAdminLiveStatuses(){
+  if(roster.length === 0) return;
+  const statuses = await Promise.all(roster.map(e => apiCall({action:'getStatus', empId: e.id})));
+  roster.forEach((e, idx)=>{
+    const status = statuses[idx];
+    const el = document.getElementById(`admin-status-${e.id}`);
+    if(!el) return;
+    if(status && status.lastType === 'IN'){
+      el.innerHTML = `<span class="admin-live-dot"></span><span class="admin-live-timer" data-start="${status.lastTimestamp}">calculating…</span> · since ${status.lastTime}`;
+      el.style.color = '#1e5c30';
+    } else {
+      el.textContent = status && status.lastTime ? `Last punched OUT at ${status.lastTime}` : 'Not punched in today';
+      el.style.color = '#999';
+    }
+  });
+  updateAdminTimers();
+  if(!adminTimerInterval){
+    adminTimerInterval = setInterval(updateAdminTimers, 30000);
+  }
+}
+
+function updateAdminTimers(){
+  document.querySelectorAll('.admin-live-timer').forEach(el=>{
+    const start = el.getAttribute('data-start');
+    if(!start) return;
+    const diff = Math.max(0, Date.now() - new Date(start).getTime());
+    const hours = Math.floor(diff/3600000);
+    const mins = Math.floor((diff%3600000)/60000);
+    el.textContent = `${hours}h ${mins}m`;
+  });
+}
+
+async function toggleAdminActivity(empId){
+  const div = document.getElementById(`admin-activity-${empId}`);
+  if(!div) return;
+  const isOpen = div.style.display === 'block';
+  document.querySelectorAll('[id^="admin-activity-"]').forEach(d => d.style.display = 'none');
+  if(isOpen) return;
+
+  div.style.display = 'block';
+  div.innerHTML = '<div class="loading">Loading…</div>';
+  const log = await apiCall({action:'getLog'}) || [];
+  const todayStr = new Date().toLocaleDateString('en-IN');
+  let todays = log.filter(r => r.empId === empId && r.displayTime && r.displayTime.split(',')[0].trim() === todayStr);
+  todays = todays.slice().reverse();
+
+  if(todays.length === 0){
+    div.innerHTML = '<div class="loading">No activity yet today.</div>';
+    return;
+  }
+
+  div.innerHTML = `<div style="font-size:11px;font-weight:700;color:#444;margin-bottom:8px;">Today's Activity</div>` +
+    todays.map(r=>{
+      const isIn = r.type === 'IN';
+      const title = isIn ? 'Punched In' : 'Punched Out';
+      const sub = isIn ? (r.lat ? 'Location verified' : 'No location captured') : (r.workNote || 'Work update added');
+      const timePart = r.displayTime.split(',')[1] ? r.displayTime.split(',')[1].trim() : r.displayTime;
+      return `
+        <div class="activity-item">
+          <div class="activity-dot ${isIn?'in':'out'}">${isIn?'✓':'⏱'}</div>
+          <div>
+            <div class="activity-title">${title}</div>
+            <div class="activity-sub">${sub}</div>
+          </div>
+          <div class="activity-time">${timePart}</div>
+        </div>
+      `;
+    }).join('');
+}
+
+async function loadPendingRequests(){
+  const wrap = document.getElementById('pendingRequestsWrap');
+  wrap.innerHTML = '<div class="loading">Loading…</div>';
+  const reqs = await apiCall({action:'getPendingRequests'}) || [];
+  if(reqs.length === 0){
+    wrap.innerHTML = '<div class="loading">No pending requests right now.</div>';
+    return;
+  }
+  wrap.innerHTML = reqs.map(r => `
+    <div class="roster-item">
+      <span>${r.empName} <span style="color:#999;font-size:10px;">requested ${new Date(r.requestTime).toLocaleTimeString('en-IN')}</span></span>
+      <button class="small-btn" style="margin-top:0;" onclick="approvePunchRequest('${r.empId}', '${r.empName.replace(/'/g,"\\'")}')">Approve</button>
+    </div>
+  `).join('');
+}
+
+async function approvePunchRequest(empId, empName){
+  const result = await apiCall({action:'approveRequest', empId});
+  if(result && result.success){
+    alert(`Temporary PIN for ${empName}: ${result.tempPin}\n\nCall them now and read this out. Valid for 5 minutes.`);
+    await loadPendingRequests();
+  } else {
+    alert(result && result.error ? result.error : 'Could not approve — try again');
+  }
+}
 async function resetPin(empId, empName){
   if(!confirm(`Reset ${empName}'s PIN? They'll be asked to set a brand new PIN next time they punch in.`)) return;
   const result = await apiCall({action:'resetPin', empId});
@@ -680,6 +848,9 @@ function switchTab(tab){
   if(tab==='admin'){
     if(adminUnlocked){
       loadLog();
+      loadPendingRequests();
+      renderRosterList();
+      refreshAdminLiveStatuses();
     } else {
       document.getElementById('pinGate').style.display = 'block';
       document.getElementById('adminContent').style.display = 'none';
@@ -694,9 +865,21 @@ function checkPin(){
     document.getElementById('pinGate').style.display = 'none';
     document.getElementById('adminContent').style.display = 'block';
     loadLog();
+    loadPendingRequests();
+    renderRosterList();
+    refreshAdminLiveStatuses();
   } else {
     document.getElementById('pinError').style.display = 'block';
   }
+}
+
+function adminSignOut(){
+  adminUnlocked = false;
+  document.getElementById('adminPinInput').value = '';
+  document.getElementById('pinError').style.display = 'none';
+  document.getElementById('pinGate').style.display = 'block';
+  document.getElementById('adminContent').style.display = 'none';
+  if(adminTimerInterval){ clearInterval(adminTimerInterval); adminTimerInterval = null; }
 }
 
 let gpsReady = false;
@@ -761,19 +944,65 @@ function setupDeviceFlow(){
   document.getElementById('manualBtnRow').style.display = mobile ? 'none' : 'flex';
 }
 
-function useFallbackPin(){
+function openRequestFlow(){
   stopScan();
   document.getElementById('mobileFlow').style.display = 'none';
-  document.getElementById('desktopFlow').style.display = 'block';
-  document.getElementById('manualBtnRow').style.display = 'flex';
-  document.getElementById('backToScanLink').style.display = 'block';
+  document.getElementById('requestFlow').style.display = 'block';
+  document.getElementById('requestEmpSelect').innerHTML = '<option value="">-- Select your name --</option>' +
+    roster.map(e => `<option value="${e.id}">${e.name} (${e.id})</option>`).join('');
+  document.getElementById('tempPinEntry').style.display = 'none';
+  document.getElementById('requestStatus').style.display = 'none';
 }
 
-function backToScan(){
-  document.getElementById('desktopFlow').style.display = 'none';
-  document.getElementById('manualBtnRow').style.display = 'none';
-  document.getElementById('backToScanLink').style.display = 'none';
+function closeRequestFlow(){
+  document.getElementById('requestFlow').style.display = 'none';
   document.getElementById('mobileFlow').style.display = 'block';
+}
+
+async function submitAdminRequest(){
+  const empId = document.getElementById('requestEmpSelect').value;
+  if(!empId){ alert('Select your name first'); return; }
+  const emp = roster.find(e => e.id === empId);
+  const statusEl = document.getElementById('requestStatus');
+  statusEl.style.display = 'block';
+  statusEl.className = 'status-box';
+  statusEl.textContent = 'Sending request…';
+
+  const result = await apiCall({action:'requestAdminApproval', empId, empName: emp.name});
+  if(result && result.success){
+    statusEl.textContent = `Request sent for ${emp.name}. Call your admin now — once they approve, enter the temporary PIN they give you below.`;
+    statusEl.className = 'status-box ok';
+    document.getElementById('tempPinEntry').style.display = 'block';
+    window._pendingRequestEmp = emp;
+  } else {
+    statusEl.textContent = 'Could not send request — check your internet connection and try again';
+    statusEl.className = 'status-box err';
+  }
+}
+
+async function submitTempPin(){
+  const emp = window._pendingRequestEmp;
+  if(!emp){ alert('Please submit a request first'); return; }
+  const pin = document.getElementById('tempPinInput').value.trim();
+  if(!/^\d{4}$/.test(pin)){ alert('Enter the 4-digit code exactly as given'); return; }
+
+  const check = await apiCall({action:'verifyTempPin', empId: emp.id, pin});
+  const statusEl = document.getElementById('requestStatus');
+  if(check && check.valid){
+    statusEl.textContent = 'Approved! Processing your punch…';
+    statusEl.className = 'status-box ok';
+    document.getElementById('requestFlow').style.display = 'none';
+    document.getElementById('mobileFlow').style.display = 'block';
+    document.getElementById('miniLoadingOverlay').style.display = 'block';
+    try{
+      await identifyEmployeeAndPunch(emp.id, emp.name);
+    } finally {
+      document.getElementById('miniLoadingOverlay').style.display = 'none';
+    }
+  } else {
+    statusEl.textContent = (check && check.error) ? check.error : 'Incorrect or expired code';
+    statusEl.className = 'status-box err';
+  }
 }
 
 let torchOn = false;
@@ -986,15 +1215,53 @@ async function onScanDetected(result){
 
   vibrateDevice([60, 40, 60]); // short-pause-short confirms a good read
   stopScan();
+  document.getElementById('miniLoadingOverlay').style.display = 'block';
   statusEl.textContent = `Identified: ${emp.name} — checking status…`;
   statusEl.className = 'status-box ok';
-  await identifyEmployeeAndPunch(emp.id, emp.name);
+  try{
+    await identifyEmployeeAndPunch(emp.id, emp.name);
+  } finally {
+    document.getElementById('miniLoadingOverlay').style.display = 'none';
+  }
 }
 
-// Shared by the scan flow: figures out whether this is an IN or OUT and acts accordingly
+function showMobileActionButton(type, empName){
+  const btn = document.getElementById('mobileActionBtn');
+  btn.style.display = 'block';
+  btn.classList.remove('btn-in','btn-out');
+  if(type === 'IN'){
+    btn.classList.add('btn-in');
+    btn.textContent = `🟢 Tap to Punch IN — ${empName}`;
+    btn.onclick = () => mobileActionTap('IN');
+  } else {
+    btn.classList.add('btn-out');
+    btn.textContent = `🔴 Tap to Punch OUT — ${empName}`;
+    btn.onclick = () => mobileActionTap('OUT');
+  }
+}
+
+function hideMobileActionButton(){
+  document.getElementById('mobileActionBtn').style.display = 'none';
+}
+
+async function mobileActionTap(type){
+  if(!gpsReady){ alert('Please wait for location to finish loading first.'); return; }
+  if(type === 'IN'){
+    await savePunch('IN', null, null);
+    await identifyEmployeeAndPunch(pendingPunch.empId, pendingPunch.empName); // refresh button to OUT state
+  } else {
+    document.getElementById('outDetails').classList.add('show');
+    document.getElementById('workNote').focus();
+  }
+}
+
+// Shared by the scan flow AND session-restore: identifies the employee and shows
+// the correct color-coded action button — does NOT auto-punch, employee taps to confirm.
 async function identifyEmployeeAndPunch(empId, empName){
   pendingPunch = {empId, empName};
+  localStorage.setItem('tazat_last_emp', JSON.stringify({empId, empName}));
   const statusEl = document.getElementById('scanStatus');
+  statusEl.style.display = 'block';
   await refreshEmployeeUI(empId, empName);
   const status = await apiCall({action:'getStatus', empId});
   if(!status){
@@ -1003,14 +1270,13 @@ async function identifyEmployeeAndPunch(empId, empName){
     return;
   }
   if(status.lastType === 'IN'){
-    statusEl.textContent = `${empName}: currently punched IN — add your work update below to punch out`;
+    statusEl.textContent = `${empName}: currently punched IN.`;
     statusEl.className = 'status-box ok';
-    document.getElementById('outDetails').classList.add('show');
-    document.getElementById('workNote').focus();
+    showMobileActionButton('OUT', empName);
   } else {
-    await savePunch('IN', null, null);
-    statusEl.textContent = `✓ Punched IN for ${empName}`;
-    statusEl.className = 'status-box ok';
+    statusEl.textContent = `${empName}: ready to punch in.`;
+    statusEl.className = 'status-box';
+    showMobileActionButton('IN', empName);
   }
 }
 
@@ -1179,9 +1445,12 @@ async function savePunch(type, status, note){
 
     const firstName = record.empName.split(' ')[0];
     if(type === 'IN'){
-      showModal('👋', `${timeGreeting()}, ${firstName}!`, "You're punched in. Have a great, safe day at work.", 2800);
+      showModal('👋', `${timeGreeting()}, ${firstName}!`, "You're punched in. Have a great, safe day at work.", 5000);
     } else {
-      showModal('🙏', `Thank you, ${firstName}!`, 'Thanks for your hard work today. See you next time.', 2800);
+      showModal('🙏', `Thank you, ${firstName}!`, 'Thanks for your hard work today. See you next time.', 5000);
+      // Shift complete — clear this device's remembered session so it's ready for the next person
+      localStorage.removeItem('tazat_last_emp');
+      hideMobileActionButton();
     }
   } else {
     document.getElementById('lastPunch').textContent = 'Failed to save punch — check your internet connection and try again';
@@ -1319,10 +1588,23 @@ async function exportCSV(){
   a.click();
 }
 
+function restoreMobileSession(){
+  if(!isMobileDevice()) return;
+  const saved = localStorage.getItem('tazat_last_emp');
+  if(!saved) return;
+  try{
+    const parsed = JSON.parse(saved);
+    if(parsed && parsed.empId){
+      identifyEmployeeAndPunch(parsed.empId, parsed.empName);
+    }
+  }catch(e){ console.warn('Could not restore mobile session', e); }
+}
+
 window.onload = async function(){
   setupDeviceFlow();
   await loadRoster();
   requestLocation();
+  restoreMobileSession();
 };
 </script>
 
