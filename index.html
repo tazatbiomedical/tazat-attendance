@@ -428,15 +428,37 @@
   .activity-sub{font-size:10.5px;color:#888;margin-top:1px;}
   .activity-time{font-size:10px;color:#aaa;margin-left:auto;white-space:nowrap;padding-left:8px;}
 
-  /* Running figure animation */
-  .runner-svg{animation:runnerBounce 0.6s ease-in-out infinite;}
-  @keyframes runnerBounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-3px);}}
-  .runner-leg1{transform-origin:20px 24px;animation:legSwingA 0.6s ease-in-out infinite;}
-  .runner-leg2{transform-origin:20px 24px;animation:legSwingB 0.6s ease-in-out infinite;}
-  .runner-arm1{transform-origin:20px 15px;animation:legSwingB 0.6s ease-in-out infinite;}
-  .runner-arm2{transform-origin:20px 15px;animation:legSwingA 0.6s ease-in-out infinite;}
-  @keyframes legSwingA{0%,100%{transform:rotate(-22deg);}50%{transform:rotate(22deg);}}
-  @keyframes legSwingB{0%,100%{transform:rotate(22deg);}50%{transform:rotate(-22deg);}}
+  /* Working indicator: radar pulse animation */
+  .radar-wrap{
+    position:relative;
+    width:32px;height:32px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+  }
+  .radar-core{
+    width:10px;height:10px;
+    border-radius:50%;
+    background:#2f8f4e;
+    z-index:2;
+    box-shadow:0 0 6px rgba(47,143,78,0.6);
+  }
+  .radar-ring{
+    position:absolute;
+    top:50%;left:50%;
+    width:10px;height:10px;
+    border-radius:50%;
+    background:rgba(47,143,78,0.45);
+    transform:translate(-50%,-50%);
+    animation:radarPulse 2s ease-out infinite;
+  }
+  .radar-ring.r2{animation-delay:0.65s;}
+  .radar-ring.r3{animation-delay:1.3s;}
+  @keyframes radarPulse{
+    0%{width:10px;height:10px;opacity:0.55;}
+    100%{width:38px;height:38px;opacity:0;}
+  }
 
   /* Admin live status indicator */
   .admin-live-dot{
@@ -502,14 +524,12 @@
         <div class="wb-since" id="wbSince">Since —</div>
       </div>
     </div>
-    <svg class="runner-svg" viewBox="0 0 40 40" width="28" height="28">
-      <circle cx="20" cy="8" r="4" fill="#2f8f4e"/>
-      <line class="runner-body" x1="20" y1="12" x2="20" y2="24" stroke="#2f8f4e" stroke-width="3" stroke-linecap="round"/>
-      <line class="runner-arm1" x1="20" y1="15" x2="14" y2="20" stroke="#2f8f4e" stroke-width="2.5" stroke-linecap="round"/>
-      <line class="runner-arm2" x1="20" y1="15" x2="26" y2="12" stroke="#2f8f4e" stroke-width="2.5" stroke-linecap="round"/>
-      <line class="runner-leg1" x1="20" y1="24" x2="14" y2="34" stroke="#2f8f4e" stroke-width="3" stroke-linecap="round"/>
-      <line class="runner-leg2" x1="20" y1="24" x2="27" y2="30" stroke="#2f8f4e" stroke-width="3" stroke-linecap="round"/>
-    </svg>
+    <div class="radar-wrap">
+      <div class="radar-ring r1"></div>
+      <div class="radar-ring r2"></div>
+      <div class="radar-ring r3"></div>
+      <div class="radar-core"></div>
+    </div>
     <div class="wb-timer">
       <b id="wbTimer">00h 00m</b>
       <span>Working Time</span>
@@ -518,7 +538,7 @@
 
   <div id="desktopFlow" style="display:none;">
     <label>Select Employee</label>
-    <select id="empSelect" onchange="onEmployeeChange()"><option value="">Loading roster…</option></select>
+    <select id="empSelect" onchange="onEmployeeChange()"><option value="">Loading crew…</option></select>
     <div class="status-box" id="empStatus" style="display:none;"></div>
     <p style="text-align:right;margin:4px 0 0;">
       <a href="#" onclick="changePinFlow(); return false;" style="font-size:11px;color:#7a1626;">Change my PIN</a>
@@ -536,7 +556,6 @@
     <button class="btn-out" id="btnStopScan" onclick="stopScan()" style="width:100%;display:none;">Stop Scanning</button>
     <div class="mini-loading" id="miniLoadingOverlay"><span class="spinner"></span>Loading your details…</div>
     <div class="status-box" id="scanStatus" style="display:none;"></div>
-    <button id="mobileActionBtn" style="width:100%;margin-top:12px;display:none;"></button>
     <p style="text-align:center;margin:10px 0 0;">
       <a href="#" onclick="openRequestFlow(); return false;" style="font-size:12px;color:#7a1626;">📵 Camera not working? Request Admin Approval</a>
     </p>
@@ -599,10 +618,7 @@
     <div style="text-align:right;">
       <button class="small-btn" style="background:#c94b4b;color:#fff;" onclick="adminSignOut()">🔒 Sign Out</button>
     </div>
-    <label>⏳ Pending Punch Requests</label>
-    <div id="pendingRequestsWrap" class="loading">Loading…</div>
-
-    <label style="margin-top:20px;">Manage Roster</label>
+    <label>Manage Crew</label>
     <div class="roster-row">
       <input id="newEmpName" placeholder="Employee name">
       <input id="newEmpId" placeholder="Employee ID" style="max-width:100px;">
@@ -698,19 +714,37 @@ function renderRosterList(){
   }
   wrap.innerHTML = roster.map(e => `
     <div class="roster-item" style="flex-direction:column;align-items:stretch;">
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <span style="cursor:pointer;" onclick="toggleAdminActivity('${e.id}')">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+        <span style="cursor:pointer;flex:1;min-width:0;" onclick="toggleAdminActivity('${e.id}')">
           <b>${e.name}</b> (${e.id})
-          <span id="admin-status-${e.id}" style="display:block;font-size:10px;color:#999;">Checking…</span>
+          <button id="admin-request-${e.id}" class="small-btn" style="display:none;background:#c94b4b;color:#fff;margin-top:4px;" onclick="event.stopPropagation(); approvePunchRequest('${e.id}','${e.name.replace(/'/g,"\\'")}')">🔔 Approval Requested — Tap to Approve</button>
+          <span id="admin-status-${e.id}" style="display:block;font-size:10px;color:#999;margin-top:2px;">Checking…</span>
         </span>
-        <span style="white-space:nowrap;">
-          <button class="small-btn" style="margin-top:0;" onclick="resetPin('${e.id}', '${e.name.replace(/'/g,"\\'")}')">Reset PIN</button>
-          <button class="del-btn" onclick="deleteEmployee('${e.id}')">Delete</button>
-        </span>
+        <select onchange="handleCrewAction(this, '${e.id}', '${e.name.replace(/'/g,"\\'")}')" style="width:auto;flex-shrink:0;">
+          <option value="">Action ▾</option>
+          <option value="reset">Reset PIN</option>
+          <option value="delete">Delete</option>
+        </select>
       </div>
       <div id="admin-activity-${e.id}" style="display:none;margin-top:8px;padding-top:8px;border-top:1px solid #f2f2f2;"></div>
     </div>
   `).join('');
+}
+
+function handleCrewAction(selectEl, empId, empName){
+  const action = selectEl.value;
+  selectEl.value = '';
+  if(action === 'reset') resetPin(empId, empName);
+  else if(action === 'delete') deleteEmployee(empId);
+}
+
+async function refreshCrewRequestIndicators(){
+  const reqs = await apiCall({action:'getPendingRequests'}) || [];
+  document.querySelectorAll('[id^="admin-request-"]').forEach(el => el.style.display = 'none');
+  reqs.forEach(r=>{
+    const el = document.getElementById(`admin-request-${r.empId}`);
+    if(el) el.style.display = 'inline-block';
+  });
 }
 
 let adminTimerInterval = null;
@@ -785,29 +819,15 @@ async function toggleAdminActivity(empId){
     }).join('');
 }
 
-async function loadPendingRequests(){
-  const wrap = document.getElementById('pendingRequestsWrap');
-  wrap.innerHTML = '<div class="loading">Loading…</div>';
-  const reqs = await apiCall({action:'getPendingRequests'}) || [];
-  if(reqs.length === 0){
-    wrap.innerHTML = '<div class="loading">No pending requests right now.</div>';
-    return;
-  }
-  wrap.innerHTML = reqs.map(r => `
-    <div class="roster-item">
-      <span>${r.empName} <span style="color:#999;font-size:10px;">requested ${new Date(r.requestTime).toLocaleTimeString('en-IN')}</span></span>
-      <button class="small-btn" style="margin-top:0;" onclick="approvePunchRequest('${r.empId}', '${r.empName.replace(/'/g,"\\'")}')">Approve</button>
-    </div>
-  `).join('');
-}
-
 async function approvePunchRequest(empId, empName){
   const result = await apiCall({action:'approveRequest', empId});
   if(result && result.success){
     alert(`Temporary PIN for ${empName}: ${result.tempPin}\n\nCall them now and read this out. Valid for 5 minutes.`);
-    await loadPendingRequests();
+    await refreshCrewRequestIndicators();
+  } else if(result && result.error){
+    alert('Server error: ' + result.error);
   } else {
-    alert(result && result.error ? result.error : 'Could not approve — try again');
+    alert('Could not reach the server — check your internet connection and try again');
   }
 }
 async function resetPin(empId, empName){
@@ -834,7 +854,7 @@ async function addEmployee(){
 
 async function deleteEmployee(id){
   const emp = roster.find(e => e.id === id);
-  if(!confirm(`Remove ${emp.name} from the roster? Their past attendance records stay in the log.`)) return;
+  if(!confirm(`Remove ${emp.name} from the crew? Their past attendance records stay in the log.`)) return;
   const result = await apiCall({action:'deleteEmployee', id});
   if(!result){ alert('Could not delete — check your Apps Script setup'); return; }
   await loadRoster();
@@ -848,9 +868,9 @@ function switchTab(tab){
   if(tab==='admin'){
     if(adminUnlocked){
       loadLog();
-      loadPendingRequests();
       renderRosterList();
       refreshAdminLiveStatuses();
+      refreshCrewRequestIndicators();
     } else {
       document.getElementById('pinGate').style.display = 'block';
       document.getElementById('adminContent').style.display = 'none';
@@ -865,9 +885,9 @@ function checkPin(){
     document.getElementById('pinGate').style.display = 'none';
     document.getElementById('adminContent').style.display = 'block';
     loadLog();
-    loadPendingRequests();
     renderRosterList();
     refreshAdminLiveStatuses();
+    refreshCrewRequestIndicators();
   } else {
     document.getElementById('pinError').style.display = 'block';
   }
@@ -974,8 +994,11 @@ async function submitAdminRequest(){
     statusEl.className = 'status-box ok';
     document.getElementById('tempPinEntry').style.display = 'block';
     window._pendingRequestEmp = emp;
+  } else if(result && result.error){
+    statusEl.textContent = 'Server error: ' + result.error + ' — make sure your Google Sheet has a "Requests" tab with the correct headers.';
+    statusEl.className = 'status-box err';
   } else {
-    statusEl.textContent = 'Could not send request — check your internet connection and try again';
+    statusEl.textContent = 'Could not reach the server — check your internet connection and try again';
     statusEl.className = 'status-box err';
   }
 }
@@ -1208,7 +1231,7 @@ async function onScanDetected(result){
   const emp = roster.find(e => e.id === code);
   if(!emp){
     vibrateDevice(100);
-    statusEl.textContent = `Scanned "${code}" — not found in the employee roster`;
+    statusEl.textContent = `Scanned "${code}" — not found in the crew list`;
     statusEl.className = 'status-box err';
     return;
   }
@@ -1225,38 +1248,21 @@ async function onScanDetected(result){
   }
 }
 
-function showMobileActionButton(type, empName){
-  const btn = document.getElementById('mobileActionBtn');
-  btn.style.display = 'block';
+function updateScanButtonColor(nextAction){
+  const btn = document.getElementById('btnStartScan');
   btn.classList.remove('btn-in','btn-out');
-  if(type === 'IN'){
-    btn.classList.add('btn-in');
-    btn.textContent = `🟢 Tap to Punch IN — ${empName}`;
-    btn.onclick = () => mobileActionTap('IN');
-  } else {
+  if(nextAction === 'OUT'){
     btn.classList.add('btn-out');
-    btn.textContent = `🔴 Tap to Punch OUT — ${empName}`;
-    btn.onclick = () => mobileActionTap('OUT');
-  }
-}
-
-function hideMobileActionButton(){
-  document.getElementById('mobileActionBtn').style.display = 'none';
-}
-
-async function mobileActionTap(type){
-  if(!gpsReady){ alert('Please wait for location to finish loading first.'); return; }
-  if(type === 'IN'){
-    await savePunch('IN', null, null);
-    await identifyEmployeeAndPunch(pendingPunch.empId, pendingPunch.empName); // refresh button to OUT state
+    btn.textContent = '🔴 Start Scanning (Punch OUT)';
   } else {
-    document.getElementById('outDetails').classList.add('show');
-    document.getElementById('workNote').focus();
+    btn.classList.add('btn-in');
+    btn.textContent = '🟢 Start Scanning (Punch IN)';
   }
 }
 
-// Shared by the scan flow AND session-restore: identifies the employee and shows
-// the correct color-coded action button — does NOT auto-punch, employee taps to confirm.
+// Used by the scan flow AND the admin-approval flow: identifies the employee and
+// immediately performs the correct action — auto Punch IN, or opens the work-update
+// form for Punch OUT (matches the original simple "just scan" behavior).
 async function identifyEmployeeAndPunch(empId, empName){
   pendingPunch = {empId, empName};
   localStorage.setItem('tazat_last_emp', JSON.stringify({empId, empName}));
@@ -1270,13 +1276,35 @@ async function identifyEmployeeAndPunch(empId, empName){
     return;
   }
   if(status.lastType === 'IN'){
-    statusEl.textContent = `${empName}: currently punched IN.`;
+    updateScanButtonColor('OUT');
+    statusEl.textContent = `${empName}: currently punched IN — add your work update below to punch out`;
     statusEl.className = 'status-box ok';
-    showMobileActionButton('OUT', empName);
+    document.getElementById('outDetails').classList.add('show');
+    document.getElementById('workNote').focus();
   } else {
-    statusEl.textContent = `${empName}: ready to punch in.`;
+    await savePunch('IN', null, null);
+    updateScanButtonColor('OUT'); // now that they're punched in, next scan should punch them out
+    statusEl.textContent = `✓ Punched IN for ${empName}`;
+    statusEl.className = 'status-box ok';
+  }
+}
+
+// Used only on page load to restore visual continuity after a refresh —
+// shows the card/timer/status but does NOT auto-punch or force the OUT form open.
+async function restoreMobileSessionDisplay(empId, empName){
+  pendingPunch = {empId, empName};
+  await refreshEmployeeUI(empId, empName);
+  const status = await apiCall({action:'getStatus', empId});
+  const statusEl = document.getElementById('scanStatus');
+  statusEl.style.display = 'block';
+  if(status && status.lastType === 'IN'){
+    updateScanButtonColor('OUT');
+    statusEl.textContent = `Welcome back, ${empName} — scan again to punch out.`;
+    statusEl.className = 'status-box ok';
+  } else {
+    updateScanButtonColor('IN');
+    statusEl.textContent = `Welcome back, ${empName} — scan again to punch in.`;
     statusEl.className = 'status-box';
-    showMobileActionButton('IN', empName);
   }
 }
 
@@ -1448,9 +1476,10 @@ async function savePunch(type, status, note){
       showModal('👋', `${timeGreeting()}, ${firstName}!`, "You're punched in. Have a great, safe day at work.", 5000);
     } else {
       showModal('🙏', `Thank you, ${firstName}!`, 'Thanks for your hard work today. See you next time.', 5000);
-      // Shift complete — clear this device's remembered session so it's ready for the next person
+      // Shift complete — clear this device's remembered session, reset scan button to green, hide today's activity
       localStorage.removeItem('tazat_last_emp');
-      hideMobileActionButton();
+      updateScanButtonColor('IN');
+      document.getElementById('activityCard').classList.remove('show');
     }
   } else {
     document.getElementById('lastPunch').textContent = 'Failed to save punch — check your internet connection and try again';
@@ -1595,7 +1624,7 @@ function restoreMobileSession(){
   try{
     const parsed = JSON.parse(saved);
     if(parsed && parsed.empId){
-      identifyEmployeeAndPunch(parsed.empId, parsed.empName);
+      restoreMobileSessionDisplay(parsed.empId, parsed.empName);
     }
   }catch(e){ console.warn('Could not restore mobile session', e); }
 }
