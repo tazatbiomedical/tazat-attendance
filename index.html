@@ -229,6 +229,24 @@
     border-bottom:1px solid #f2f2f2;
   }
   .roster-item:last-child{border-bottom:none;}
+  .crew-action-select{
+    appearance:none;
+    -webkit-appearance:none;
+    -moz-appearance:none;
+    background:linear-gradient(135deg, var(--gold), #b98f3d);
+    color:var(--maroon-dark);
+    font-weight:700;
+    font-size:11px;
+    border:none;
+    border-radius:20px;
+    padding:6px 26px 6px 12px;
+    cursor:pointer;
+    background-image:linear-gradient(135deg, var(--gold), #b98f3d), url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath fill='%235c0f1c' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+    background-repeat:no-repeat, no-repeat;
+    background-position:0 0, right 10px center;
+    background-size:100% 100%, 9px 6px;
+    box-shadow:0 2px 6px rgba(122,22,38,0.15);
+  }
   .loading{
     text-align:center;
     color:#999;
@@ -556,8 +574,8 @@
     <button class="btn-out" id="btnStopScan" onclick="stopScan()" style="width:100%;display:none;">Stop Scanning</button>
     <div class="mini-loading" id="miniLoadingOverlay"><span class="spinner"></span>Loading your details…</div>
     <div class="status-box" id="scanStatus" style="display:none;"></div>
-    <p style="text-align:center;margin:10px 0 0;">
-      <a href="#" onclick="openRequestFlow(); return false;" style="font-size:12px;color:#7a1626;">📵 Camera not working? Request Admin Approval</a>
+    <p style="text-align:center;margin:12px 0 0;">
+      <button type="button" onclick="openRequestFlow()" style="background:#f0a500;color:#4a2e00;width:100%;font-weight:800;">📵 Camera not working? Request Admin Approval</button>
     </p>
   </div>
 
@@ -720,8 +738,8 @@ function renderRosterList(){
           <button id="admin-request-${e.id}" class="small-btn" style="display:none;background:#c94b4b;color:#fff;margin-top:4px;" onclick="event.stopPropagation(); approvePunchRequest('${e.id}','${e.name.replace(/'/g,"\\'")}')">🔔 Approval Requested — Tap to Approve</button>
           <span id="admin-status-${e.id}" style="display:block;font-size:10px;color:#999;margin-top:2px;">Checking…</span>
         </span>
-        <select onchange="handleCrewAction(this, '${e.id}', '${e.name.replace(/'/g,"\\'")}')" style="width:auto;flex-shrink:0;">
-          <option value="">Action ▾</option>
+        <select class="crew-action-select" onchange="handleCrewAction(this, '${e.id}', '${e.name.replace(/'/g,"\\'")}')">
+          <option value="">Action</option>
           <option value="reset">Reset PIN</option>
           <option value="delete">Delete</option>
         </select>
@@ -866,15 +884,21 @@ function switchTab(tab){
   document.getElementById('punchPanel').style.display = tab==='punch' ? 'block' : 'none';
   document.getElementById('adminPanel').style.display = tab==='admin' ? 'block' : 'none';
   if(tab==='admin'){
-    if(adminUnlocked){
+    if(adminUnlocked || sessionStorage.getItem('tazat_admin_unlocked') === 'true'){
+      adminUnlocked = true;
+      document.getElementById('pinGate').style.display = 'none';
+      document.getElementById('adminContent').style.display = 'block';
       loadLog();
       renderRosterList();
       refreshAdminLiveStatuses();
       refreshCrewRequestIndicators();
+      startAdminPolling();
     } else {
       document.getElementById('pinGate').style.display = 'block';
       document.getElementById('adminContent').style.display = 'none';
     }
+  } else {
+    stopAdminPolling();
   }
 }
 
@@ -882,12 +906,14 @@ function checkPin(){
   const val = document.getElementById('adminPinInput').value;
   if(val === ADMIN_PIN){
     adminUnlocked = true;
+    sessionStorage.setItem('tazat_admin_unlocked', 'true');
     document.getElementById('pinGate').style.display = 'none';
     document.getElementById('adminContent').style.display = 'block';
     loadLog();
     renderRosterList();
     refreshAdminLiveStatuses();
     refreshCrewRequestIndicators();
+    startAdminPolling();
   } else {
     document.getElementById('pinError').style.display = 'block';
   }
@@ -895,11 +921,26 @@ function checkPin(){
 
 function adminSignOut(){
   adminUnlocked = false;
+  sessionStorage.removeItem('tazat_admin_unlocked');
   document.getElementById('adminPinInput').value = '';
   document.getElementById('pinError').style.display = 'none';
   document.getElementById('pinGate').style.display = 'block';
   document.getElementById('adminContent').style.display = 'none';
   if(adminTimerInterval){ clearInterval(adminTimerInterval); adminTimerInterval = null; }
+  stopAdminPolling();
+}
+
+let adminPollInterval = null;
+function startAdminPolling(){
+  stopAdminPolling();
+  // Lightweight: only refreshes live statuses + pending-request indicators, doesn't rebuild the whole list
+  adminPollInterval = setInterval(()=>{
+    refreshAdminLiveStatuses();
+    refreshCrewRequestIndicators();
+  }, 15000);
+}
+function stopAdminPolling(){
+  if(adminPollInterval){ clearInterval(adminPollInterval); adminPollInterval = null; }
 }
 
 let gpsReady = false;
@@ -1090,6 +1131,7 @@ function hideEmployeeCard(){
 }
 
 let workTimerInterval = null;
+let suppressActivityDisplay = false;
 function startWorkTimer(isoTimestamp, displaySince){
   stopWorkTimer();
   document.getElementById('wbSince').textContent = 'Since ' + (displaySince || '—');
@@ -1114,6 +1156,10 @@ function stopWorkTimer(){
 async function renderTodayActivity(empId){
   const card = document.getElementById('activityCard');
   const list = document.getElementById('activityList');
+  if(suppressActivityDisplay){
+    card.classList.remove('show');
+    return;
+  }
   card.classList.add('show');
   list.innerHTML = '<div class="loading">Loading…</div>';
 
@@ -1476,10 +1522,9 @@ async function savePunch(type, status, note){
       showModal('👋', `${timeGreeting()}, ${firstName}!`, "You're punched in. Have a great, safe day at work.", 5000);
     } else {
       showModal('🙏', `Thank you, ${firstName}!`, 'Thanks for your hard work today. See you next time.', 5000);
-      // Shift complete — clear this device's remembered session, reset scan button to green, hide today's activity
+      // Shift complete — clear this device's remembered session, reset scan button to green
       localStorage.removeItem('tazat_last_emp');
       updateScanButtonColor('IN');
-      document.getElementById('activityCard').classList.remove('show');
     }
   } else {
     document.getElementById('lastPunch').textContent = 'Failed to save punch — check your internet connection and try again';
@@ -1487,6 +1532,12 @@ async function savePunch(type, status, note){
 
   await onEmployeeChange(); // refresh desktop status + button states (no-op if on mobile flow)
   await refreshEmployeeUI(pendingPunch.empId, pendingPunch.empName); // refresh timer + activity feed either way
+
+  if(type === 'OUT' && result && result.success !== false){
+    // Hide Today's Activity after a completed punch-out — must happen AFTER refreshEmployeeUI,
+    // since that call re-shows it via renderTodayActivity.
+    document.getElementById('activityCard').classList.remove('show');
+  }
 }
 
 async function loadLog(){
