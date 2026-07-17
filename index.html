@@ -575,7 +575,9 @@
     <div class="mini-loading" id="miniLoadingOverlay"><span class="spinner"></span>Loading your details…</div>
     <div class="status-box" id="scanStatus" style="display:none;"></div>
     <p style="text-align:center;margin:12px 0 0;">
-      <button type="button" onclick="openRequestFlow()" style="background:#f0a500;color:#4a2e00;width:100%;font-weight:800;">📵 Camera not working? Request Admin Approval</button>
+      <p style="text-align:center;margin:10px 0 0;">
+        <a href="#" onclick="openRequestFlow(); return false;" style="font-size:12px;color:#7a1626;">📵 Camera not working? Request Admin Approval</a>
+      </p>
     </p>
   </div>
 
@@ -738,22 +740,14 @@ function renderRosterList(){
           <button id="admin-request-${e.id}" class="small-btn" style="display:none;background:#c94b4b;color:#fff;margin-top:4px;" onclick="event.stopPropagation(); approvePunchRequest('${e.id}','${e.name.replace(/'/g,"\\'")}')">🔔 Approval Requested — Tap to Approve</button>
           <span id="admin-status-${e.id}" style="display:block;font-size:10px;color:#999;margin-top:2px;">Checking…</span>
         </span>
-        <select class="crew-action-select" onchange="handleCrewAction(this, '${e.id}', '${e.name.replace(/'/g,"\\'")}')">
-          <option value="">Action</option>
-          <option value="reset">Reset PIN</option>
-          <option value="delete">Delete</option>
-        </select>
+        <span style="white-space:nowrap;">
+          <button class="small-btn" style="margin-top:0;" onclick="resetPin('${e.id}', '${e.name.replace(/'/g,"\\'")}')">Reset PIN</button>
+          <button class="del-btn" onclick="deleteEmployee('${e.id}')">Delete</button>
+        </span>
       </div>
       <div id="admin-activity-${e.id}" style="display:none;margin-top:8px;padding-top:8px;border-top:1px solid #f2f2f2;"></div>
     </div>
   `).join('');
-}
-
-function handleCrewAction(selectEl, empId, empName){
-  const action = selectEl.value;
-  selectEl.value = '';
-  if(action === 'reset') resetPin(empId, empName);
-  else if(action === 'delete') deleteEmployee(empId);
 }
 
 async function refreshCrewRequestIndicators(){
