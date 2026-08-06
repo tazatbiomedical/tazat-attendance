@@ -534,6 +534,12 @@
     <div class="emp-card-date" id="empCardDate"></div>
   </div>
 
+  <div class="status-box" id="assignmentCard" style="display:none;background:linear-gradient(135deg,#fdf3e0,#f7e6c4);border-left:4px solid var(--gold);">
+    <b>📍 Today's Visit:</b> <span id="assignmentSiteName"></span><br>
+    <span id="assignmentSiteAddress" style="font-size:11px;"></span><br>
+    <span id="assignmentSiteContact" style="font-size:11px;"></span>
+  </div>
+
   <div class="working-banner" id="workingBanner">
     <div class="wb-left">
       <div class="wb-dot"></div>
@@ -638,7 +644,33 @@
     <div style="text-align:right;">
       <button class="small-btn" style="background:#c94b4b;color:#fff;" onclick="adminSignOut()">🔒 Sign Out</button>
     </div>
-    <label>Manage Crew</label>
+
+    <label>📍 Site Directory</label>
+    <div class="roster-row">
+      <input id="newSiteName" placeholder="Site name (e.g. Apollo Hospital)">
+    </div>
+    <div class="roster-row">
+      <input id="newSiteAddress" placeholder="Address">
+      <input id="newSiteContact" placeholder="Contact number" style="max-width:140px;">
+    </div>
+    <div class="roster-row">
+      <input id="newSiteDetails" placeholder="Other details (optional)">
+    </div>
+    <button class="small-btn" onclick="addSite()">+ Add Site</button>
+    <div class="roster-list" id="sitesList"></div>
+
+    <label style="margin-top:20px;">🗓️ Assign Today's Visit</label>
+    <div class="roster-row">
+      <select id="assignEmpSelect"><option value="">Select employee</option></select>
+      <select id="assignSiteSelect"><option value="">Select site</option></select>
+    </div>
+    <button class="small-btn" onclick="assignVisit()">Assign</button>
+    <div id="todayAssignmentsList" class="loading">Loading…</div>
+
+    <label style="margin-top:20px;">🛰️ Live Location Tracking</label>
+    <div id="liveTrackingList" class="loading">Loading…</div>
+
+    <label style="margin-top:20px;">Manage Crew</label>
     <div class="roster-row">
       <input id="newEmpName" placeholder="Employee name">
       <input id="newEmpId" placeholder="Employee ID" style="max-width:100px;">
@@ -724,6 +756,107 @@ function renderRosterSelect(){
   sel.innerHTML = '<option value="">-- Select your name --</option>' +
     roster.map(e => `<option value="${e.id}">${e.name} (${e.id})</option>`).join('');
   sel.value = prev;
+}
+
+// ---- Site Directory ----
+async function loadSites(){
+  const sites = await apiCall({action:'getSites'}) || [];
+  const wrap = document.getElementById('sitesList');
+  if(sites.length === 0){
+    wrap.innerHTML = '<div class="roster-item">No sites added yet.</div>';
+  } else {
+    wrap.innerHTML = sites.map(s => `
+      <div class="roster-item">
+        <span>
+          <b>${s.siteName}</b><br>
+          <span style="font-size:10.5px;color:#888;">${s.address || ''} ${s.contact ? '· 📞 '+s.contact : ''}</span>
+        </span>
+        <button class="del-btn" onclick="deleteSite('${s.siteId}')">Delete</button>
+      </div>
+    `).join('');
+  }
+
+  const assignSel = document.getElementById('assignSiteSelect');
+  assignSel.innerHTML = '<option value="">Select site</option>' +
+    sites.map(s => `<option value="${s.siteId}">${s.siteName}</option>`).join('');
+}
+
+async function addSite(){
+  const siteName = document.getElementById('newSiteName').value.trim();
+  const address = document.getElementById('newSiteAddress').value.trim();
+  const contact = document.getElementById('newSiteContact').value.trim();
+  const details = document.getElementById('newSiteDetails').value.trim();
+  if(!siteName){ alert('Enter a site name'); return; }
+  const result = await apiCall({action:'addSite', siteName, address, contact, details});
+  if(!result || !result.success){ alert('Could not save site — try again'); return; }
+  document.getElementById('newSiteName').value = '';
+  document.getElementById('newSiteAddress').value = '';
+  document.getElementById('newSiteContact').value = '';
+  document.getElementById('newSiteDetails').value = '';
+  await loadSites();
+}
+
+async function deleteSite(siteId){
+  if(!confirm('Remove this site from the directory?')) return;
+  await apiCall({action:'deleteSite', siteId});
+  await loadSites();
+}
+
+// ---- Visit Assignments ----
+function populateAssignEmpSelect(){
+  const sel = document.getElementById('assignEmpSelect');
+  sel.innerHTML = '<option value="">Select employee</option>' +
+    roster.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
+}
+
+async function assignVisit(){
+  const empId = document.getElementById('assignEmpSelect').value;
+  const siteId = document.getElementById('assignSiteSelect').value;
+  if(!empId || !siteId){ alert('Pick both an employee and a site'); return; }
+  const emp = roster.find(e => e.id === empId);
+  const siteSel = document.getElementById('assignSiteSelect');
+  const siteName = siteSel.options[siteSel.selectedIndex].textContent;
+  const result = await apiCall({action:'assignVisit', empId, empName: emp.name, siteId, siteName});
+  if(result && result.success){
+    await loadTodayAssignments();
+  } else {
+    alert('Could not assign — try again');
+  }
+}
+
+async function loadTodayAssignments(){
+  const wrap = document.getElementById('todayAssignmentsList');
+  const list = await apiCall({action:'getAllTodayAssignments'}) || [];
+  if(list.length === 0){
+    wrap.innerHTML = '<div class="loading">No one assigned yet today.</div>';
+    return;
+  }
+  wrap.innerHTML = list.map(a => `
+    <div class="roster-item"><span><b>${a.empName}</b> → ${a.siteName}</span></div>
+  `).join('');
+}
+
+// ---- Live Location Tracking ----
+async function loadLiveTracking(){
+  const wrap = document.getElementById('liveTrackingList');
+  const pings = await apiCall({action:'getLatestPings'}) || [];
+  if(pings.length === 0){
+    wrap.innerHTML = '<div class="loading">No location pings recorded yet.</div>';
+    return;
+  }
+  wrap.innerHTML = pings.map(p => {
+    const mins = Math.round((Date.now() - new Date(p.timestamp).getTime()) / 60000);
+    const ago = mins < 1 ? 'just now' : mins < 60 ? `${mins} min ago` : `${Math.round(mins/60)}h ago`;
+    const mapLink = (p.lat && p.lng)
+      ? `<a href="https://www.openstreetmap.org/?mlat=${p.lat}&mlon=${p.lng}#map=16/${p.lat}/${p.lng}" target="_blank" style="color:#7a1626;">View on map</a>`
+      : '';
+    return `
+      <div class="roster-item">
+        <span><b>${p.empName}</b><br><span style="font-size:10.5px;color:#888;">Last seen ${ago}</span></span>
+        <span>${mapLink}</span>
+      </div>
+    `;
+  }).join('');
 }
 
 function renderRosterList(){
@@ -886,6 +1019,10 @@ function switchTab(tab){
       renderRosterList();
       refreshAdminLiveStatuses();
       refreshCrewRequestIndicators();
+      loadSites();
+      populateAssignEmpSelect();
+      loadTodayAssignments();
+      loadLiveTracking();
       startAdminPolling();
     } else {
       document.getElementById('pinGate').style.display = 'block';
@@ -907,6 +1044,10 @@ function checkPin(){
     renderRosterList();
     refreshAdminLiveStatuses();
     refreshCrewRequestIndicators();
+    loadSites();
+    populateAssignEmpSelect();
+    loadTodayAssignments();
+    loadLiveTracking();
     startAdminPolling();
   } else {
     document.getElementById('pinError').style.display = 'block';
@@ -927,10 +1068,11 @@ function adminSignOut(){
 let adminPollInterval = null;
 function startAdminPolling(){
   stopAdminPolling();
-  // Lightweight: only refreshes live statuses + pending-request indicators, doesn't rebuild the whole list
+  // Lightweight: refreshes live statuses, pending-request indicators, and live tracking — doesn't rebuild the whole list
   adminPollInterval = setInterval(()=>{
     refreshAdminLiveStatuses();
     refreshCrewRequestIndicators();
+    loadLiveTracking();
   }, 15000);
 }
 function stopAdminPolling(){
@@ -1122,6 +1264,7 @@ function hideEmployeeCard(){
   document.getElementById('empCard').classList.remove('show');
   stopWorkTimer();
   document.getElementById('activityCard').classList.remove('show');
+  document.getElementById('assignmentCard').style.display = 'none';
 }
 
 let workTimerInterval = null;
@@ -1195,10 +1338,48 @@ async function refreshEmployeeUI(empId, empName){
   const status = await apiCall({action:'getStatus', empId});
   if(status && status.lastType === 'IN'){
     startWorkTimer(status.lastTimestamp, status.lastTime);
+    startLocationPinging(empId, empName); // resume pinging if already mid-shift (e.g. after refresh)
   } else {
     stopWorkTimer();
+    stopLocationPinging();
   }
   await renderTodayActivity(empId);
+  await showTodayAssignment(empId);
+}
+
+async function showTodayAssignment(empId){
+  const card = document.getElementById('assignmentCard');
+  const assignment = await apiCall({action:'getTodayAssignment', empId});
+  if(assignment && assignment.siteName){
+    const sites = await apiCall({action:'getSites'}) || [];
+    const site = sites.find(s => s.siteId === assignment.siteId) || {};
+    document.getElementById('assignmentSiteName').textContent = assignment.siteName;
+    document.getElementById('assignmentSiteAddress').textContent = site.address || '';
+    document.getElementById('assignmentSiteContact').textContent = site.contact ? ('📞 ' + site.contact) : '';
+    card.style.display = 'block';
+  } else {
+    card.style.display = 'none';
+  }
+}
+
+// Periodic location pings while punched in — every 10 minutes, only while the app stays open
+let pingInterval = null;
+function startLocationPinging(empId, empName){
+  if(pingInterval) return; // already running
+  pingInterval = setInterval(()=>{
+    if(!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition((pos)=>{
+      apiCall({
+        action: 'logPing',
+        empId, empName,
+        lat: pos.coords.latitude.toFixed(5),
+        lng: pos.coords.longitude.toFixed(5)
+      });
+    }, ()=>{ /* ignore failures silently, next cycle will retry */ });
+  }, 600000); // 10 minutes
+}
+function stopLocationPinging(){
+  if(pingInterval){ clearInterval(pingInterval); pingInterval = null; }
 }
 
 let scanning = false;
