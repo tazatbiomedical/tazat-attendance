@@ -11,6 +11,7 @@
     --maroon:#7a1626;
     --maroon-dark:#5c0f1c;
     --gold:#c9a24b;
+    --gold-light:#e8d6a8;
     --cream:#fdf8ee;
   }
   *{box-sizing:border-box;}
@@ -34,6 +35,8 @@
   }
   header h1{margin:0;font-size:17px;letter-spacing:0.5px;}
   header p{margin:3px 0 0;font-size:11px;color:var(--gold);}
+
+  #setupWarning{display:none;width:100%;max-width:480px;background:#fff3d6;color:#8a5a00;font-size:12px;padding:10px 16px;text-align:center;margin-top:10px;border-radius:6px;}
 
   .tabs{
     display:flex;
@@ -73,51 +76,24 @@
     box-shadow:0 4px 18px rgba(0,0,0,0.06);
   }
 
-  label{
-    display:block;
-    font-size:12px;
-    font-weight:700;
-    color:#444;
-    margin:12px 0 5px;
-  }
+  label{display:block;font-size:12px;font-weight:700;color:#444;margin:12px 0 5px;}
   select, input, textarea{
-    width:100%;
-    padding:10px;
-    border:1px solid #ccc;
-    border-radius:6px;
-    font-size:14px;
-    font-family:inherit;
+    width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;
+    font-size:14px;font-family:inherit;
   }
   textarea{resize:vertical;min-height:60px;}
+
   .status-box{
-    margin-top:14px;
-    padding:12px 14px;
-    border-radius:10px;
-    background:#f5f0e2;
-    font-size:12px;
-    color:#555;
-    line-height:1.5;
-    transition:all 0.25s ease;
+    margin-top:14px;padding:12px 14px;border-radius:10px;background:#f5f0e2;
+    font-size:12px;color:#555;line-height:1.5;transition:all 0.25s ease;
   }
   .status-box.ok{
-    background:linear-gradient(135deg, #e7f5e9, #d9f0dd);
-    color:#1e5c30;
-    font-weight:700;
-    font-size:13px;
-    padding:14px 16px;
-    display:flex;
-    align-items:center;
-    gap:10px;
+    background:linear-gradient(135deg, #e7f5e9, #d9f0dd);color:#1e5c30;font-weight:700;
+    font-size:13px;padding:14px 16px;display:flex;align-items:center;gap:10px;
     box-shadow:0 2px 10px rgba(47,143,78,0.15);
   }
   .status-box.ok::before{
-    content:'';
-    width:11px;
-    height:11px;
-    border-radius:50%;
-    background:#2f8f4e;
-    flex-shrink:0;
-    box-shadow:0 0 0 rgba(47,143,78,0.5);
+    content:'';width:11px;height:11px;border-radius:50%;background:#2f8f4e;flex-shrink:0;
     animation:pulseDot 1.6s infinite;
   }
   @keyframes pulseDot{
@@ -127,383 +103,148 @@
   }
   .status-box.err{background:#fbe7e7;color:#8a1f1f;}
 
-  .btn-row{
-    display:flex;
-    gap:10px;
-    margin-top:18px;
-  }
+  .btn-row{display:flex;gap:10px;margin-top:18px;}
   button{
-    flex:1;
-    padding:14px;
-    border:none;
-    border-radius:8px;
-    font-size:15px;
-    font-weight:700;
-    cursor:pointer;
-    color:#fff;
+    padding:14px;border:none;border-radius:8px;font-size:15px;font-weight:700;
+    cursor:pointer;color:#fff;
   }
-  .btn-in{background:#2f8f4e;}
+  .btn-in{background:#2f8f4e;flex:1;}
   .btn-in:hover{background:#256b3c;}
-  .btn-out{background:var(--maroon);}
+  .btn-out{background:var(--maroon);flex:1;}
   .btn-out:hover{background:var(--maroon-dark);}
   button:disabled{opacity:0.5;cursor:not-allowed;}
 
-  .last-punch{
-    margin-top:16px;
-    font-size:12px;
-    color:#666;
-    text-align:center;
-  }
+  .last-punch{margin-top:16px;font-size:12px;color:#666;text-align:center;}
 
-  #outDetails{
-    display:none;
-    margin-top:14px;
-    padding:12px;
-    background:#fdf8ee;
-    border:1px dashed var(--gold);
-    border-radius:8px;
-  }
+  #outDetails{display:none;margin-top:14px;padding:12px;background:var(--cream);border:1px dashed var(--gold);border-radius:8px;}
   #outDetails.show{display:block;}
 
-  /* admin */
-  table{
-    width:100%;
-    border-collapse:collapse;
-    font-size:11px;
-    margin-top:10px;
-  }
-  th, td{
-    padding:6px 5px;
-    border-bottom:1px solid #eee;
-    text-align:left;
-    vertical-align:top;
-  }
+  table{width:100%;border-collapse:collapse;font-size:11px;margin-top:10px;}
+  th, td{padding:6px 5px;border-bottom:1px solid #eee;text-align:left;vertical-align:top;}
   th{background:var(--maroon);color:#fff;font-size:10px;}
-  .badge{
-    display:inline-block;
-    padding:2px 7px;
-    border-radius:10px;
-    font-size:9.5px;
-    font-weight:700;
-  }
+  .badge{display:inline-block;padding:2px 7px;border-radius:10px;font-size:9.5px;font-weight:700;}
   .badge.completed{background:#e7f5e9;color:#256029;}
   .badge.pending{background:#fff3d6;color:#8a5a00;}
   .small-btn{
-    padding:6px 10px;
-    font-size:11px;
-    border-radius:5px;
-    background:var(--gold);
-    color:var(--maroon-dark);
-    font-weight:700;
-    border:none;
-    cursor:pointer;
-    margin-top:8px;
-    width:auto;
+    padding:6px 10px;font-size:11px;border-radius:5px;background:var(--gold);color:var(--maroon-dark);
+    font-weight:700;border:none;cursor:pointer;margin-top:8px;width:auto;
   }
-  .del-btn{
-    background:#c94b4b;
-    color:#fff;
-    border:none;
-    border-radius:4px;
-    padding:4px 8px;
-    font-size:10px;
-    cursor:pointer;
-  }
-  .roster-row{
-    display:flex;
-    gap:6px;
-    margin-top:8px;
-  }
-  .roster-row input{flex:1;}
-  .roster-list{
-    margin-top:10px;
-    border:1px solid #eee;
-    border-radius:6px;
-  }
-  .roster-item{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:7px 10px;
-    font-size:12px;
-    border-bottom:1px solid #f2f2f2;
-  }
+  .del-btn{background:#c94b4b;color:#fff;border:none;border-radius:4px;padding:4px 8px;font-size:10px;cursor:pointer;}
+  .roster-row{display:flex;gap:6px;margin-top:8px;}
+  .roster-row input, .roster-row select{flex:1;}
+  .roster-list{margin-top:10px;border:1px solid #eee;border-radius:6px;}
+  .roster-item{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;font-size:12px;border-bottom:1px solid #f2f2f2;}
   .roster-item:last-child{border-bottom:none;}
-  .crew-action-select{
-    appearance:none;
-    -webkit-appearance:none;
-    -moz-appearance:none;
-    background:linear-gradient(135deg, var(--gold), #b98f3d);
-    color:var(--maroon-dark);
-    font-weight:700;
-    font-size:11px;
-    border:none;
-    border-radius:20px;
-    padding:6px 26px 6px 12px;
-    cursor:pointer;
-    background-image:linear-gradient(135deg, var(--gold), #b98f3d), url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath fill='%235c0f1c' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
-    background-repeat:no-repeat, no-repeat;
-    background-position:0 0, right 10px center;
-    background-size:100% 100%, 9px 6px;
-    box-shadow:0 2px 6px rgba(122,22,38,0.15);
-  }
-  .loading{
-    text-align:center;
-    color:#999;
-    font-size:12px;
-    padding:20px;
-  }
-  .pin-gate{
-    text-align:center;
-    padding:30px 10px;
-  }
-  .pin-gate input{
-    max-width:160px;
-    margin:12px auto;
-    text-align:center;
-    letter-spacing:4px;
-    font-size:18px;
+  .loading{text-align:center;color:#999;font-size:12px;padding:20px;}
+  .pin-gate{text-align:center;padding:30px 10px;}
+  .pin-gate input{max-width:160px;margin:12px auto;text-align:center;letter-spacing:4px;font-size:18px;}
+
+  .dept-header{
+    margin-top:18px;padding:8px 12px;background:linear-gradient(135deg, var(--maroon), var(--maroon-dark));
+    color:#fff;border-radius:8px;font-size:12px;font-weight:800;letter-spacing:0.3px;
   }
 
-  /* Greeting / Thank-you modal */
+  /* Modal (greeting/thank-you/work-type picker) */
   .modal-overlay{
-    position:fixed;
-    inset:0;
-    background:rgba(30,15,15,0.55);
-    display:none;
-    align-items:center;
-    justify-content:center;
-    z-index:999;
-    opacity:0;
-    transition:opacity 0.25s ease;
+    position:fixed;inset:0;background:rgba(30,15,15,0.55);display:none;
+    align-items:center;justify-content:center;z-index:999;opacity:0;transition:opacity 0.25s ease;
   }
   .modal-overlay.show{display:flex;opacity:1;}
   .modal-card{
-    background:#fff;
-    border-radius:18px;
-    padding:36px 28px;
-    text-align:center;
-    max-width:320px;
-    width:88%;
-    box-shadow:0 20px 50px rgba(0,0,0,0.3);
-    transform:scale(0.85);
-    transition:transform 0.25s ease;
+    background:#fff;border-radius:18px;padding:32px 26px;text-align:center;max-width:340px;
+    width:88%;box-shadow:0 20px 50px rgba(0,0,0,0.3);transform:scale(0.85);transition:transform 0.25s ease;
   }
   .modal-overlay.show .modal-card{transform:scale(1);}
   .modal-icon{font-size:44px;margin-bottom:10px;}
   .modal-title{font-size:19px;font-weight:800;color:var(--maroon-dark);margin-bottom:6px;}
   .modal-sub{font-size:13px;color:#666;line-height:1.5;}
+  .worktype-btn{
+    display:block;width:100%;margin-top:10px;padding:14px;border-radius:10px;
+    background:linear-gradient(135deg, var(--maroon), var(--maroon-dark));color:#fff;
+    font-size:14px;font-weight:700;border:none;cursor:pointer;
+  }
+  .worktype-btn:hover{opacity:0.9;}
 
-  /* Scan overlay */
-  .scan-frame{
-    position:absolute;
-    top:14%;left:14%;right:14%;bottom:14%;
-    pointer-events:none;
-    z-index:5;
-  }
-  .scan-frame .corner{
-    position:absolute;
-    width:24px;height:24px;
-    border:3px solid var(--gold);
-  }
+  .scan-frame{position:absolute;top:14%;left:14%;right:14%;bottom:14%;pointer-events:none;z-index:5;}
+  .scan-frame .corner{position:absolute;width:24px;height:24px;border:3px solid var(--gold);}
   .scan-frame .tl{top:0;left:0;border-right:none;border-bottom:none;border-radius:6px 0 0 0;}
   .scan-frame .tr{top:0;right:0;border-left:none;border-bottom:none;border-radius:0 6px 0 0;}
   .scan-frame .bl{bottom:0;left:0;border-right:none;border-top:none;border-radius:0 0 0 6px;}
   .scan-frame .br{bottom:0;right:0;border-left:none;border-top:none;border-radius:0 0 6px 0;}
   .scan-line{
-    position:absolute;
-    left:14%;right:14%;
-    top:14%;
-    height:2px;
-    background:linear-gradient(90deg, transparent, #ff3b3b, transparent);
-    z-index:5;
+    position:absolute;left:14%;right:14%;top:14%;height:2px;
+    background:linear-gradient(90deg, transparent, #ff3b3b, transparent);z-index:5;
     animation:scanSweep 2s ease-in-out infinite;
   }
-  @keyframes scanSweep{
-    0%{top:14%;}
-    50%{top:82%;}
-    100%{top:14%;}
-  }
-  .torch-btn{
-    position:absolute;
-    bottom:10px;right:10px;
-    width:auto;
-    flex:none;
-    background:rgba(0,0,0,0.5);
-    color:#fff;
-    padding:8px 12px;
-    font-size:11px;
-    border-radius:20px;
-    z-index:6;
-  }
-  .processing-text{
-    display:inline-flex;
-    align-items:center;
-    gap:6px;
-  }
-  .spinner{
-    width:14px;height:14px;
-    border:2px solid rgba(255,255,255,0.4);
-    border-top-color:#fff;
-    border-radius:50%;
-    animation:spin 0.7s linear infinite;
-  }
+  @keyframes scanSweep{0%{top:14%;}50%{top:82%;}100%{top:14%;}}
+  .torch-btn{position:absolute;bottom:10px;right:10px;width:auto;flex:none;background:rgba(0,0,0,0.5);color:#fff;padding:8px 12px;font-size:11px;border-radius:20px;z-index:6;}
+  .processing-text{display:inline-flex;align-items:center;gap:6px;}
+  .spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;}
   @keyframes spin{to{transform:rotate(360deg);}}
 
-  /* Employee profile card */
   .emp-card{
-    display:none;
-    align-items:center;
-    gap:12px;
-    padding:14px;
-    background:linear-gradient(135deg, #fff, #fdf8ee);
-    border-radius:12px;
-    margin-bottom:14px;
+    display:none;align-items:center;gap:12px;padding:14px;
+    background:linear-gradient(135deg, #fff, #fdf8ee);border-radius:12px;margin-bottom:14px;
     box-shadow:0 2px 10px rgba(0,0,0,0.05);
   }
   .emp-card.show{display:flex;}
   .avatar-circle{
-    width:52px;height:52px;
-    border-radius:50%;
-    background:linear-gradient(135deg, var(--maroon), var(--maroon-dark));
-    color:#fff;
-    display:flex;align-items:center;justify-content:center;
-    font-weight:800;font-size:17px;
-    flex-shrink:0;
+    width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg, var(--maroon), var(--maroon-dark));
+    color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:17px;flex-shrink:0;
   }
   .emp-card-info{flex:1;min-width:0;}
   .emp-card-greet{font-size:12px;color:#888;}
   .emp-card-name{font-size:15px;font-weight:800;color:var(--maroon-dark);}
-  .emp-card-id{
-    display:inline-block;
-    margin-top:2px;
-    font-size:10px;
-    font-weight:700;
-    background:var(--gold-light,#e8d6a8);
-    color:var(--maroon-dark);
-    padding:2px 8px;
-    border-radius:8px;
-  }
-  .emp-card-date{
-    text-align:right;
-    font-size:11px;
-    color:#888;
-    flex-shrink:0;
-  }
+  .emp-card-id{display:inline-block;margin-top:2px;font-size:10px;font-weight:700;background:var(--gold-light);color:var(--maroon-dark);padding:2px 8px;border-radius:8px;}
+  .emp-card-date{text-align:right;font-size:11px;color:#888;flex-shrink:0;}
   .emp-card-date b{display:block;font-size:12px;color:#444;}
 
-  /* Working banner with live timer */
   .working-banner{
-    display:none;
-    justify-content:space-between;
-    align-items:center;
-    background:linear-gradient(135deg, #e7f5e9, #d9f0dd);
-    border-radius:12px;
-    padding:14px 16px;
-    margin-bottom:14px;
-    box-shadow:0 2px 10px rgba(47,143,78,0.15);
+    display:none;justify-content:space-between;align-items:center;
+    background:linear-gradient(135deg, #e7f5e9, #d9f0dd);border-radius:12px;padding:14px 16px;
+    margin-bottom:14px;box-shadow:0 2px 10px rgba(47,143,78,0.15);
   }
   .working-banner.show{display:flex;}
   .working-banner .wb-left{display:flex;align-items:center;gap:8px;}
-  .working-banner .wb-dot{
-    width:11px;height:11px;border-radius:50%;background:#2f8f4e;
-    animation:pulseDot 1.6s infinite;
-  }
+  .working-banner .wb-dot{width:11px;height:11px;border-radius:50%;background:#2f8f4e;animation:pulseDot 1.6s infinite;}
   .working-banner .wb-label{font-size:12px;font-weight:700;color:#1e5c30;}
   .working-banner .wb-since{font-size:10.5px;color:#3d7a4d;}
   .working-banner .wb-timer{text-align:right;}
   .working-banner .wb-timer b{display:block;font-size:15px;color:#1e5c30;}
   .working-banner .wb-timer span{font-size:9.5px;color:#3d7a4d;}
 
-  /* Today's Activity timeline */
+  .radar-wrap{position:relative;width:32px;height:32px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .radar-core{width:10px;height:10px;border-radius:50%;background:#2f8f4e;z-index:2;box-shadow:0 0 6px rgba(47,143,78,0.6);}
+  .radar-ring{position:absolute;top:50%;left:50%;width:10px;height:10px;border-radius:50%;background:rgba(47,143,78,0.45);transform:translate(-50%,-50%);animation:radarPulse 2s ease-out infinite;}
+  .radar-ring.r2{animation-delay:0.65s;}
+  .radar-ring.r3{animation-delay:1.3s;}
+  @keyframes radarPulse{0%{width:10px;height:10px;opacity:0.55;}100%{width:38px;height:38px;opacity:0;}}
+
   .activity-card{display:none;margin-top:16px;}
   .activity-card.show{display:block;}
   .activity-card h3{font-size:12px;color:#444;margin:0 0 10px;font-weight:700;}
-  .activity-item{
-    display:flex;
-    gap:10px;
-    padding-bottom:14px;
-    position:relative;
-  }
-  .activity-item:not(:last-child)::before{
-    content:'';
-    position:absolute;
-    left:9px;top:22px;bottom:0;
-    width:2px;
-    background:#eee;
-  }
-  .activity-dot{
-    width:20px;height:20px;
-    border-radius:50%;
-    display:flex;align-items:center;justify-content:center;
-    font-size:10px;
-    flex-shrink:0;
-    color:#fff;
-  }
+  .activity-item{display:flex;gap:10px;padding-bottom:14px;position:relative;}
+  .activity-item:not(:last-child)::before{content:'';position:absolute;left:9px;top:22px;bottom:0;width:2px;background:#eee;}
+  .activity-dot{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;color:#fff;}
   .activity-dot.in{background:#2f8f4e;}
   .activity-dot.out{background:var(--maroon);}
   .activity-title{font-size:12px;font-weight:700;color:#333;}
   .activity-sub{font-size:10.5px;color:#888;margin-top:1px;}
   .activity-time{font-size:10px;color:#aaa;margin-left:auto;white-space:nowrap;padding-left:8px;}
 
-  /* Working indicator: radar pulse animation */
-  .radar-wrap{
-    position:relative;
-    width:32px;height:32px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    flex-shrink:0;
-  }
-  .radar-core{
-    width:10px;height:10px;
-    border-radius:50%;
-    background:#2f8f4e;
-    z-index:2;
-    box-shadow:0 0 6px rgba(47,143,78,0.6);
-  }
-  .radar-ring{
-    position:absolute;
-    top:50%;left:50%;
-    width:10px;height:10px;
-    border-radius:50%;
-    background:rgba(47,143,78,0.45);
-    transform:translate(-50%,-50%);
-    animation:radarPulse 2s ease-out infinite;
-  }
-  .radar-ring.r2{animation-delay:0.65s;}
-  .radar-ring.r3{animation-delay:1.3s;}
-  @keyframes radarPulse{
-    0%{width:10px;height:10px;opacity:0.55;}
-    100%{width:38px;height:38px;opacity:0;}
-  }
+  .visit-log-btn{width:100%;margin-top:14px;background:var(--gold);color:var(--maroon-dark);}
+  #visitForm{display:none;margin-top:12px;padding:14px;background:var(--cream);border:1px dashed var(--gold);border-radius:8px;}
+  #visitForm.show{display:block;}
+  .visit-thumb{width:100%;max-height:160px;object-fit:cover;border-radius:8px;margin-top:8px;display:none;}
+  .visit-list-item{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #f2f2f2;align-items:center;}
+  .visit-list-item img{width:40px;height:40px;border-radius:6px;object-fit:cover;flex-shrink:0;}
+  .visit-list-item .vname{font-size:12px;font-weight:700;color:#333;}
+  .visit-list-item .vnote{font-size:10.5px;color:#888;}
 
-  /* Admin live status indicator */
-  .admin-live-dot{
-    display:inline-block;
-    width:7px;height:7px;
-    border-radius:50%;
-    background:#2f8f4e;
-    margin-right:4px;
-    animation:pulseDot 1.6s infinite;
-  }
+  .admin-live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#2f8f4e;margin-right:4px;animation:pulseDot 1.6s infinite;}
 
-  /* Mini loading overlay (scan -> form transition) */
-  .mini-loading{
-    display:none;
-    text-align:center;
-    padding:14px;
-    font-size:12px;
-    color:#666;
-  }
-  .mini-loading .spinner{
-    border-top-color:var(--maroon);
-    border-color:rgba(122,22,38,0.2);
-    width:16px;height:16px;
-    display:inline-block;
-    vertical-align:middle;
-    margin-right:8px;
-  }
+  .mini-loading{display:none;text-align:center;padding:14px;font-size:12px;color:#666;}
+  .mini-loading .spinner{border-top-color:var(--maroon);border-color:rgba(122,22,38,0.2);width:16px;height:16px;display:inline-block;vertical-align:middle;margin-right:8px;}
 </style>
 </head>
 <body>
@@ -513,9 +254,7 @@
   <p>FIELD ATTENDANCE · CHECK-IN SYSTEM</p>
 </header>
 
-<div id="setupWarning" style="display:none;width:100%;max-width:480px;background:#fff3d6;color:#8a5a00;font-size:12px;padding:10px 16px;text-align:center;margin-top:10px;border-radius:6px;">
-  ⚠️ Setup incomplete: paste your Google Apps Script URL into the <code>API_URL</code> line near the top of this file's script. See setup instructions.
-</div>
+<div id="setupWarning">⚠️ Setup incomplete: paste your Google Apps Script URL into the <code>API_URL</code> line near the top of this file's script.</div>
 
 <div class="tabs">
   <div class="tab active" id="tabPunch" onclick="switchTab('punch')">Punch In/Out</div>
@@ -534,12 +273,6 @@
     <div class="emp-card-date" id="empCardDate"></div>
   </div>
 
-  <div class="status-box" id="assignmentCard" style="display:none;background:linear-gradient(135deg,#fdf3e0,#f7e6c4);border-left:4px solid var(--gold);">
-    <b>📍 Today's Visit:</b> <span id="assignmentSiteName"></span><br>
-    <span id="assignmentSiteAddress" style="font-size:11px;"></span><br>
-    <span id="assignmentSiteContact" style="font-size:11px;"></span>
-  </div>
-
   <div class="working-banner" id="workingBanner">
     <div class="wb-left">
       <div class="wb-dot"></div>
@@ -549,15 +282,10 @@
       </div>
     </div>
     <div class="radar-wrap">
-      <div class="radar-ring r1"></div>
-      <div class="radar-ring r2"></div>
-      <div class="radar-ring r3"></div>
+      <div class="radar-ring r1"></div><div class="radar-ring r2"></div><div class="radar-ring r3"></div>
       <div class="radar-core"></div>
     </div>
-    <div class="wb-timer">
-      <b id="wbTimer">00h 00m</b>
-      <span>Working Time</span>
-    </div>
+    <div class="wb-timer"><b id="wbTimer">00h 00m</b><span>Working Time</span></div>
   </div>
 
   <div id="desktopFlow" style="display:none;">
@@ -566,6 +294,9 @@
     <div class="status-box" id="empStatus" style="display:none;"></div>
     <p style="text-align:right;margin:4px 0 0;">
       <a href="#" onclick="changePinFlow(); return false;" style="font-size:11px;color:#7a1626;">Change my PIN</a>
+    </p>
+    <p id="backToScanLink" style="display:none;text-align:center;margin:10px 0 0;">
+      <a href="#" onclick="backToScan(); return false;" style="font-size:12px;color:#7a1626;font-weight:700;">📷 Back to scanning</a>
     </p>
   </div>
 
@@ -580,25 +311,23 @@
     <button class="btn-out" id="btnStopScan" onclick="stopScan()" style="width:100%;display:none;">Stop Scanning</button>
     <div class="mini-loading" id="miniLoadingOverlay"><span class="spinner"></span>Loading your details…</div>
     <div class="status-box" id="scanStatus" style="display:none;"></div>
-    <p style="text-align:center;margin:12px 0 0;">
-      <p style="text-align:center;margin:10px 0 0;">
-        <a href="#" onclick="openRequestFlow(); return false;" style="font-size:12px;color:#7a1626;">📵 Camera not working? Request Admin Approval</a>
-      </p>
+    <p style="text-align:center;margin:10px 0 0;">
+      <a href="#" onclick="openRequestFlow(); return false;" style="font-size:12px;color:#7a1626;">📵 Camera not working? Request Admin Approval</a>
     </p>
   </div>
 
   <div id="requestFlow" style="display:none;">
-    <label>Select your name</label>
-    <select id="requestEmpSelect"><option value="">-- Select your name --</option></select>
+    <label>Request Admin Approval</label>
+    <select id="requestEmpSelect"><option value="">Select your name</option></select>
     <button class="btn-in" style="width:100%;margin-top:10px;" onclick="submitAdminRequest()">Request Admin Approval</button>
     <div class="status-box" id="requestStatus" style="display:none;"></div>
-    <div id="tempPinEntry" style="display:none;margin-top:14px;">
-      <label>Enter the temporary PIN your admin gave you over phone</label>
-      <input id="tempPinInput" maxlength="4" placeholder="4-digit code">
-      <button class="btn-in" style="width:100%;margin-top:10px;" onclick="submitTempPin()">Confirm & Punch</button>
+    <div id="tempPinEntry" style="display:none;margin-top:12px;">
+      <label>Enter the temporary PIN your admin gave you</label>
+      <input type="text" id="tempPinInput" maxlength="4" placeholder="****">
+      <button class="btn-out" style="width:100%;margin-top:10px;" onclick="submitTempPin()">Submit</button>
     </div>
-    <p style="text-align:center;margin:14px 0 0;">
-      <a href="#" onclick="closeRequestFlow(); return false;" style="font-size:12px;color:#7a1626;">📷 Back to scanning</a>
+    <p style="text-align:center;margin:10px 0 0;">
+      <a href="#" onclick="closeRequestFlow(); return false;" style="font-size:12px;color:#7a1626;">← Back to scanning</a>
     </p>
   </div>
 
@@ -609,6 +338,24 @@
     <button class="btn-out" id="btnOut" onclick="startPunch('OUT')" disabled>Punch OUT</button>
   </div>
 
+  <button class="visit-log-btn" id="btnLogVisit" style="display:none;" onclick="openVisitForm()">+ Log a Hospital Visit</button>
+  <div id="visitForm">
+    <label>Hospital / Clinic Name</label>
+    <input id="visitHospitalName" placeholder="e.g. Apollo Hospital">
+    <label>Note (optional)</label>
+    <textarea id="visitNote" placeholder="What was done here?"></textarea>
+    <label>Photo</label>
+    <input type="file" id="visitPhotoInput" accept="image/*" capture="environment" onchange="previewVisitPhoto()">
+    <img id="visitPhotoPreview" class="visit-thumb">
+    <button class="btn-in" style="width:100%;margin-top:10px;" id="btnSubmitVisit" onclick="submitVisit()">Save Visit</button>
+    <button class="btn-out" style="width:100%;margin-top:8px;" onclick="closeVisitForm()">Cancel</button>
+  </div>
+
+  <div id="todaysVisitsWrap" style="display:none;margin-top:14px;">
+    <label>Today's Logged Visits</label>
+    <div id="todaysVisitsList"></div>
+  </div>
+
   <div id="outDetails">
     <label>Work Status</label>
     <select id="workStatus">
@@ -616,8 +363,8 @@
       <option value="Completed">Completed</option>
     </select>
     <label>What work was done?</label>
-    <textarea id="workNote" placeholder="e.g. Calibrated 3 ventilators at City Hospital, pending 2 more tomorrow"></textarea>
-    <button class="btn-out" id="btnConfirmOut" style="margin-top:12px;" onclick="confirmPunchOut()">Confirm Punch OUT</button>
+    <textarea id="workNote" placeholder="e.g. Calibrated 3 ventilators, visited 4 hospitals today"></textarea>
+    <button class="btn-out" id="btnConfirmOut" style="width:100%;margin-top:12px;" onclick="confirmPunchOut()">Confirm Punch OUT</button>
   </div>
 
   <div class="last-punch" id="lastPunch"></div>
@@ -630,13 +377,10 @@
 
 <div class="panel" id="adminPanel" style="display:none;">
 
-
   <div class="pin-gate" id="pinGate">
     <p style="font-size:13px;color:#555;">Enter Admin PIN to view attendance data</p>
     <input type="password" id="adminPinInput" maxlength="4" placeholder="****">
-    <div>
-      <button class="small-btn" onclick="checkPin()">Unlock</button>
-    </div>
+    <div><button class="small-btn" onclick="checkPin()">Unlock</button></div>
     <div class="status-box err" id="pinError" style="display:none;max-width:220px;margin:10px auto;">Wrong PIN</div>
   </div>
 
@@ -645,39 +389,23 @@
       <button class="small-btn" style="background:#c94b4b;color:#fff;" onclick="adminSignOut()">🔒 Sign Out</button>
     </div>
 
-    <label>📍 Site Directory</label>
-    <div class="roster-row">
-      <input id="newSiteName" placeholder="Site name (e.g. Apollo Hospital)">
-    </div>
-    <div class="roster-row">
-      <input id="newSiteAddress" placeholder="Address">
-      <input id="newSiteContact" placeholder="Contact number" style="max-width:140px;">
-    </div>
-    <div class="roster-row">
-      <input id="newSiteDetails" placeholder="Other details (optional)">
-    </div>
-    <button class="small-btn" onclick="addSite()">+ Add Site</button>
-    <div class="roster-list" id="sitesList"></div>
-
-    <label style="margin-top:20px;">🗓️ Assign Today's Visit</label>
-    <div class="roster-row">
-      <select id="assignEmpSelect"><option value="">Select employee</option></select>
-      <select id="assignSiteSelect"><option value="">Select site</option></select>
-    </div>
-    <button class="small-btn" onclick="assignVisit()">Assign</button>
-    <div id="todayAssignmentsList" class="loading">Loading…</div>
-
-    <label style="margin-top:20px;">🛰️ Live Location Tracking</label>
-    <div id="liveTrackingList" class="loading">Loading…</div>
-
-    <label style="margin-top:20px;">Manage Crew</label>
+    <label>Manage Crew</label>
     <div class="roster-row">
       <input id="newEmpName" placeholder="Employee name">
       <input id="newEmpId" placeholder="Employee ID" style="max-width:100px;">
     </div>
+    <div class="roster-row">
+      <select id="newEmpDept">
+        <option value="C1-Calibration">C1 — Calibration</option>
+        <option value="R2-Rental">R2 — Rental</option>
+        <option value="Sales-ClientRelations">Sales / Client Relations</option>
+        <option value="Accounts">Accounts</option>
+        <option value="Management">Management</option>
+      </select>
+    </div>
     <button class="small-btn" onclick="addEmployee()">+ Add Employee</button>
     <p style="font-size:11px;color:#888;margin-top:4px;">No PIN needed here — the employee sets their own PIN the first time they punch in.</p>
-    <div class="roster-list" id="rosterList"></div>
+    <div id="crewByDept"></div>
 
     <label style="margin-top:20px;">Daily Records → Excel</label>
     <button class="small-btn" onclick="exportAllDaysExcel()">Export All Days (one workbook, one tab per day)</button>
@@ -689,7 +417,7 @@
   </div>
 </div>
 
-<div class="modal-overlay" id="greetModal" onclick="this.classList.remove('show')">
+<div class="modal-overlay" id="greetModal" onclick="if(event.target===this) this.classList.remove('show')">
   <div class="modal-card">
     <div class="modal-icon" id="greetIcon">👋</div>
     <div class="modal-title" id="greetTitle">Good morning!</div>
@@ -697,57 +425,79 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="workTypeModal">
+  <div class="modal-card">
+    <div class="modal-icon">🧭</div>
+    <div class="modal-title">What are you working on today?</div>
+    <div id="workTypeOptions"></div>
+  </div>
+</div>
+
 <script>
 // ============================================================
 // SETUP: paste your Google Apps Script Web App URL below.
-// See the setup instructions provided alongside this file.
 // ============================================================
 const API_URL = "https://script.google.com/macros/s/AKfycbzOT5Pc7gDepHBgOkIGD3-CuitEPf1cRC2NCsU8V7XnSebnu5_Hu1Dc5x6WQ9V46qDy/exec";
+
+const WORK_TYPES = {
+  'C1-Calibration': ['Hospital Visit','Calibration Service'],
+  'R2-Rental': ['Hospital Visit','Rental Service'],
+  'Sales-ClientRelations': ['Client Visit','Office Work'],
+  'Accounts': [],
+  'Management': []
+};
+const DEPT_LABELS = {
+  'C1-Calibration': '🔧 Calibration Team (C1)',
+  'R2-Rental': '🚐 Rental Team (R2)',
+  'Sales-ClientRelations': '🤝 Sales / Client Relations',
+  'Accounts': '💰 Accounts',
+  'Management': '👤 Management'
+};
+const VISIT_ENABLED_DEPTS = ['C1-Calibration','R2-Rental','Sales-ClientRelations'];
 
 let roster = [];
 let cachedLog = [];
 let currentCoords = null;
-let pendingPunch = null; // {empId, empName}
+let pendingPunch = null;
+let currentWorkType = '';
 const ADMIN_PIN = "5055"; // change this to your own 4-digit PIN
 let adminUnlocked = false;
 
-function apiConfigured(){
-  return API_URL && API_URL.indexOf("PASTE_YOUR") === -1;
-}
+function apiConfigured(){ return API_URL && API_URL.indexOf("PASTE_YOUR") === -1; }
 
 async function apiCall(params){
-  if(!apiConfigured()){
-    console.warn("API_URL not configured yet.");
-    return null;
-  }
+  if(!apiConfigured()){ console.warn("API_URL not configured yet."); return null; }
   try{
     const qs = new URLSearchParams(params).toString();
     const res = await fetch(`${API_URL}?${qs}`);
     if(!res.ok) throw new Error("Network response not ok");
     return await res.json();
-  }catch(e){
-    console.error("API call failed:", e);
-    return null;
-  }
+  }catch(e){ console.error("API call failed:", e); return null; }
+}
+
+async function apiPost(payload){
+  if(!apiConfigured()) return null;
+  try{
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'text/plain;charset=utf-8'},
+      body: JSON.stringify(payload)
+    });
+    return await res.json();
+  }catch(e){ console.error("API POST failed:", e); return null; }
 }
 
 function showSetupWarning(){
-  const el = document.getElementById('setupWarning');
-  if(el) el.style.display = apiConfigured() ? 'none' : 'block';
+  document.getElementById('setupWarning').style.display = apiConfigured() ? 'none' : 'block';
 }
 
+// ---------------- Roster ----------------
 async function loadRoster(){
   showSetupWarning();
-  if(!apiConfigured()){
-    roster = [];
-    renderRosterSelect();
-    renderRosterList();
-    return;
-  }
+  if(!apiConfigured()){ roster = []; renderRosterSelect(); return; }
   const r = await apiCall({action:'getRoster'});
   roster = (r && Array.isArray(r)) ? r : [];
   renderRosterSelect();
-  renderRosterList();
 }
 
 function renderRosterSelect(){
@@ -756,245 +506,26 @@ function renderRosterSelect(){
   sel.innerHTML = '<option value="">-- Select your name --</option>' +
     roster.map(e => `<option value="${e.id}">${e.name} (${e.id})</option>`).join('');
   sel.value = prev;
-}
 
-// ---- Site Directory ----
-async function loadSites(){
-  const sites = await apiCall({action:'getSites'}) || [];
-  const wrap = document.getElementById('sitesList');
-  if(sites.length === 0){
-    wrap.innerHTML = '<div class="roster-item">No sites added yet.</div>';
-  } else {
-    wrap.innerHTML = sites.map(s => `
-      <div class="roster-item">
-        <span>
-          <b>${s.siteName}</b><br>
-          <span style="font-size:10.5px;color:#888;">${s.address || ''} ${s.contact ? '· 📞 '+s.contact : ''}</span>
-        </span>
-        <button class="del-btn" onclick="deleteSite('${s.siteId}')">Delete</button>
-      </div>
-    `).join('');
-  }
-
-  const assignSel = document.getElementById('assignSiteSelect');
-  assignSel.innerHTML = '<option value="">Select site</option>' +
-    sites.map(s => `<option value="${s.siteId}">${s.siteName}</option>`).join('');
-}
-
-async function addSite(){
-  const siteName = document.getElementById('newSiteName').value.trim();
-  const address = document.getElementById('newSiteAddress').value.trim();
-  const contact = document.getElementById('newSiteContact').value.trim();
-  const details = document.getElementById('newSiteDetails').value.trim();
-  if(!siteName){ alert('Enter a site name'); return; }
-  const result = await apiCall({action:'addSite', siteName, address, contact, details});
-  if(!result || !result.success){ alert('Could not save site — try again'); return; }
-  document.getElementById('newSiteName').value = '';
-  document.getElementById('newSiteAddress').value = '';
-  document.getElementById('newSiteContact').value = '';
-  document.getElementById('newSiteDetails').value = '';
-  await loadSites();
-}
-
-async function deleteSite(siteId){
-  if(!confirm('Remove this site from the directory?')) return;
-  await apiCall({action:'deleteSite', siteId});
-  await loadSites();
-}
-
-// ---- Visit Assignments ----
-function populateAssignEmpSelect(){
-  const sel = document.getElementById('assignEmpSelect');
-  sel.innerHTML = '<option value="">Select employee</option>' +
-    roster.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
-}
-
-async function assignVisit(){
-  const empId = document.getElementById('assignEmpSelect').value;
-  const siteId = document.getElementById('assignSiteSelect').value;
-  if(!empId || !siteId){ alert('Pick both an employee and a site'); return; }
-  const emp = roster.find(e => e.id === empId);
-  const siteSel = document.getElementById('assignSiteSelect');
-  const siteName = siteSel.options[siteSel.selectedIndex].textContent;
-  const result = await apiCall({action:'assignVisit', empId, empName: emp.name, siteId, siteName});
-  if(result && result.success){
-    await loadTodayAssignments();
-  } else {
-    alert('Could not assign — try again');
-  }
-}
-
-async function loadTodayAssignments(){
-  const wrap = document.getElementById('todayAssignmentsList');
-  const list = await apiCall({action:'getAllTodayAssignments'}) || [];
-  if(list.length === 0){
-    wrap.innerHTML = '<div class="loading">No one assigned yet today.</div>';
-    return;
-  }
-  wrap.innerHTML = list.map(a => `
-    <div class="roster-item"><span><b>${a.empName}</b> → ${a.siteName}</span></div>
-  `).join('');
-}
-
-// ---- Live Location Tracking ----
-async function loadLiveTracking(){
-  const wrap = document.getElementById('liveTrackingList');
-  const pings = await apiCall({action:'getLatestPings'}) || [];
-  if(pings.length === 0){
-    wrap.innerHTML = '<div class="loading">No location pings recorded yet.</div>';
-    return;
-  }
-  wrap.innerHTML = pings.map(p => {
-    const mins = Math.round((Date.now() - new Date(p.timestamp).getTime()) / 60000);
-    const ago = mins < 1 ? 'just now' : mins < 60 ? `${mins} min ago` : `${Math.round(mins/60)}h ago`;
-    const mapLink = (p.lat && p.lng)
-      ? `<a href="https://www.openstreetmap.org/?mlat=${p.lat}&mlon=${p.lng}#map=16/${p.lat}/${p.lng}" target="_blank" style="color:#7a1626;">View on map</a>`
-      : '';
-    return `
-      <div class="roster-item">
-        <span><b>${p.empName}</b><br><span style="font-size:10.5px;color:#888;">Last seen ${ago}</span></span>
-        <span>${mapLink}</span>
-      </div>
-    `;
-  }).join('');
-}
-
-function renderRosterList(){
-  const wrap = document.getElementById('rosterList');
-  if(roster.length === 0){
-    wrap.innerHTML = '<div class="roster-item">No employees added yet.</div>';
-    return;
-  }
-  wrap.innerHTML = roster.map(e => `
-    <div class="roster-item" style="flex-direction:column;align-items:stretch;">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
-        <span style="cursor:pointer;flex:1;min-width:0;" onclick="toggleAdminActivity('${e.id}')">
-          <b>${e.name}</b> (${e.id})
-          <button id="admin-request-${e.id}" class="small-btn" style="display:none;background:#c94b4b;color:#fff;margin-top:4px;" onclick="event.stopPropagation(); approvePunchRequest('${e.id}','${e.name.replace(/'/g,"\\'")}')">🔔 Approval Requested — Tap to Approve</button>
-          <span id="admin-status-${e.id}" style="display:block;font-size:10px;color:#999;margin-top:2px;">Checking…</span>
-        </span>
-        <span style="white-space:nowrap;">
-          <button class="small-btn" style="margin-top:0;" onclick="resetPin('${e.id}', '${e.name.replace(/'/g,"\\'")}')">Reset PIN</button>
-          <button class="del-btn" onclick="deleteEmployee('${e.id}')">Delete</button>
-        </span>
-      </div>
-      <div id="admin-activity-${e.id}" style="display:none;margin-top:8px;padding-top:8px;border-top:1px solid #f2f2f2;"></div>
-    </div>
-  `).join('');
-}
-
-async function refreshCrewRequestIndicators(){
-  const reqs = await apiCall({action:'getPendingRequests'}) || [];
-  document.querySelectorAll('[id^="admin-request-"]').forEach(el => el.style.display = 'none');
-  reqs.forEach(r=>{
-    const el = document.getElementById(`admin-request-${r.empId}`);
-    if(el) el.style.display = 'inline-block';
-  });
-}
-
-let adminTimerInterval = null;
-
-async function refreshAdminLiveStatuses(){
-  if(roster.length === 0) return;
-  const statuses = await Promise.all(roster.map(e => apiCall({action:'getStatus', empId: e.id})));
-  roster.forEach((e, idx)=>{
-    const status = statuses[idx];
-    const el = document.getElementById(`admin-status-${e.id}`);
-    if(!el) return;
-    if(status && status.lastType === 'IN'){
-      el.innerHTML = `<span class="admin-live-dot"></span><span class="admin-live-timer" data-start="${status.lastTimestamp}">calculating…</span> · since ${status.lastTime}`;
-      el.style.color = '#1e5c30';
-    } else {
-      el.textContent = status && status.lastTime ? `Last punched OUT at ${status.lastTime}` : 'Not punched in today';
-      el.style.color = '#999';
-    }
-  });
-  updateAdminTimers();
-  if(!adminTimerInterval){
-    adminTimerInterval = setInterval(updateAdminTimers, 30000);
-  }
-}
-
-function updateAdminTimers(){
-  document.querySelectorAll('.admin-live-timer').forEach(el=>{
-    const start = el.getAttribute('data-start');
-    if(!start) return;
-    const diff = Math.max(0, Date.now() - new Date(start).getTime());
-    const hours = Math.floor(diff/3600000);
-    const mins = Math.floor((diff%3600000)/60000);
-    el.textContent = `${hours}h ${mins}m`;
-  });
-}
-
-async function toggleAdminActivity(empId){
-  const div = document.getElementById(`admin-activity-${empId}`);
-  if(!div) return;
-  const isOpen = div.style.display === 'block';
-  document.querySelectorAll('[id^="admin-activity-"]').forEach(d => d.style.display = 'none');
-  if(isOpen) return;
-
-  div.style.display = 'block';
-  div.innerHTML = '<div class="loading">Loading…</div>';
-  const log = await apiCall({action:'getLog'}) || [];
-  const todayStr = new Date().toLocaleDateString('en-IN');
-  let todays = log.filter(r => r.empId === empId && r.displayTime && r.displayTime.split(',')[0].trim() === todayStr);
-  todays = todays.slice().reverse();
-
-  if(todays.length === 0){
-    div.innerHTML = '<div class="loading">No activity yet today.</div>';
-    return;
-  }
-
-  div.innerHTML = `<div style="font-size:11px;font-weight:700;color:#444;margin-bottom:8px;">Today's Activity</div>` +
-    todays.map(r=>{
-      const isIn = r.type === 'IN';
-      const title = isIn ? 'Punched In' : 'Punched Out';
-      const sub = isIn ? (r.lat ? 'Location verified' : 'No location captured') : (r.workNote || 'Work update added');
-      const timePart = r.displayTime.split(',')[1] ? r.displayTime.split(',')[1].trim() : r.displayTime;
-      return `
-        <div class="activity-item">
-          <div class="activity-dot ${isIn?'in':'out'}">${isIn?'✓':'⏱'}</div>
-          <div>
-            <div class="activity-title">${title}</div>
-            <div class="activity-sub">${sub}</div>
-          </div>
-          <div class="activity-time">${timePart}</div>
-        </div>
-      `;
-    }).join('');
-}
-
-async function approvePunchRequest(empId, empName){
-  const result = await apiCall({action:'approveRequest', empId});
-  if(result && result.success){
-    alert(`Temporary PIN for ${empName}: ${result.tempPin}\n\nCall them now and read this out. Valid for 5 minutes.`);
-    await refreshCrewRequestIndicators();
-  } else if(result && result.error){
-    alert('Server error: ' + result.error);
-  } else {
-    alert('Could not reach the server — check your internet connection and try again');
-  }
-}
-async function resetPin(empId, empName){
-  if(!confirm(`Reset ${empName}'s PIN? They'll be asked to set a brand new PIN next time they punch in.`)) return;
-  const result = await apiCall({action:'resetPin', empId});
-  if(result && result.success){
-    alert(`${empName}'s PIN has been reset.`);
-  } else {
-    alert('Could not reset PIN — try again');
+  const reqSel = document.getElementById('requestEmpSelect');
+  if(reqSel){
+    reqSel.innerHTML = '<option value="">-- Select your name --</option>' +
+      roster.map(e => `<option value="${e.id}">${e.name} (${e.id})</option>`).join('');
   }
 }
 
 async function addEmployee(){
   const name = document.getElementById('newEmpName').value.trim();
   const id = document.getElementById('newEmpId').value.trim();
+  const department = document.getElementById('newEmpDept').value;
   if(!name || !id){ alert('Enter both name and ID'); return; }
   if(roster.some(e => e.id === id)){ alert('Employee ID already exists'); return; }
-  const result = await apiCall({action:'addEmployee', id, name});
+  const result = await apiCall({action:'addEmployee', id, name, department});
   if(!result){ alert('Could not save — check your Apps Script setup'); return; }
   document.getElementById('newEmpName').value = '';
   document.getElementById('newEmpId').value = '';
   await loadRoster();
+  await renderCrewByDept();
 }
 
 async function deleteEmployee(id){
@@ -1003,532 +534,10 @@ async function deleteEmployee(id){
   const result = await apiCall({action:'deleteEmployee', id});
   if(!result){ alert('Could not delete — check your Apps Script setup'); return; }
   await loadRoster();
+  await renderCrewByDept();
 }
 
-function switchTab(tab){
-  document.getElementById('tabPunch').classList.toggle('active', tab==='punch');
-  document.getElementById('tabAdmin').classList.toggle('active', tab==='admin');
-  document.getElementById('punchPanel').style.display = tab==='punch' ? 'block' : 'none';
-  document.getElementById('adminPanel').style.display = tab==='admin' ? 'block' : 'none';
-  if(tab==='admin'){
-    if(adminUnlocked || sessionStorage.getItem('tazat_admin_unlocked') === 'true'){
-      adminUnlocked = true;
-      document.getElementById('pinGate').style.display = 'none';
-      document.getElementById('adminContent').style.display = 'block';
-      loadLog();
-      renderRosterList();
-      refreshAdminLiveStatuses();
-      refreshCrewRequestIndicators();
-      loadSites();
-      populateAssignEmpSelect();
-      loadTodayAssignments();
-      loadLiveTracking();
-      startAdminPolling();
-    } else {
-      document.getElementById('pinGate').style.display = 'block';
-      document.getElementById('adminContent').style.display = 'none';
-    }
-  } else {
-    stopAdminPolling();
-  }
-}
-
-function checkPin(){
-  const val = document.getElementById('adminPinInput').value;
-  if(val === ADMIN_PIN){
-    adminUnlocked = true;
-    sessionStorage.setItem('tazat_admin_unlocked', 'true');
-    document.getElementById('pinGate').style.display = 'none';
-    document.getElementById('adminContent').style.display = 'block';
-    loadLog();
-    renderRosterList();
-    refreshAdminLiveStatuses();
-    refreshCrewRequestIndicators();
-    loadSites();
-    populateAssignEmpSelect();
-    loadTodayAssignments();
-    loadLiveTracking();
-    startAdminPolling();
-  } else {
-    document.getElementById('pinError').style.display = 'block';
-  }
-}
-
-function adminSignOut(){
-  adminUnlocked = false;
-  sessionStorage.removeItem('tazat_admin_unlocked');
-  document.getElementById('adminPinInput').value = '';
-  document.getElementById('pinError').style.display = 'none';
-  document.getElementById('pinGate').style.display = 'block';
-  document.getElementById('adminContent').style.display = 'none';
-  if(adminTimerInterval){ clearInterval(adminTimerInterval); adminTimerInterval = null; }
-  stopAdminPolling();
-}
-
-let adminPollInterval = null;
-function startAdminPolling(){
-  stopAdminPolling();
-  // Lightweight: refreshes live statuses, pending-request indicators, and live tracking — doesn't rebuild the whole list
-  adminPollInterval = setInterval(()=>{
-    refreshAdminLiveStatuses();
-    refreshCrewRequestIndicators();
-    loadLiveTracking();
-  }, 15000);
-}
-function stopAdminPolling(){
-  if(adminPollInterval){ clearInterval(adminPollInterval); adminPollInterval = null; }
-}
-
-let gpsReady = false;
-
-function requestLocation(){
-  const statusEl = document.getElementById('locStatus');
-  statusEl.textContent = '📍 Getting your location… please wait';
-
-  if(!navigator.geolocation){
-    statusEl.textContent = 'Location: not supported on this browser';
-    statusEl.className = 'status-box err';
-    unlockPunchUI(); // don't trap the employee forever
-    return;
-  }
-
-  // Safety net: unlock after 10s even if GPS never resolves, so nobody gets stuck
-  const fallbackTimer = setTimeout(()=>{
-    if(!gpsReady){
-      statusEl.textContent = '⚠️ Continuing without location — GPS took too long';
-      statusEl.className = 'status-box err';
-      unlockPunchUI();
-    }
-  }, 10000);
-
-  navigator.geolocation.getCurrentPosition(
-    (pos)=>{
-      clearTimeout(fallbackTimer);
-      currentCoords = {lat: pos.coords.latitude.toFixed(5), lng: pos.coords.longitude.toFixed(5)};
-      statusEl.textContent = `Location captured: ${currentCoords.lat}, ${currentCoords.lng}`;
-      statusEl.className = 'status-box ok';
-      unlockPunchUI();
-    },
-    (err)=>{
-      clearTimeout(fallbackTimer);
-      statusEl.textContent = 'Location: permission denied — punch will be logged without GPS';
-      statusEl.className = 'status-box err';
-      currentCoords = null;
-      unlockPunchUI();
-    },
-    {enableHighAccuracy:true, timeout:8000}
-  );
-}
-
-function unlockPunchUI(){
-  gpsReady = true;
-  const scanBtn = document.getElementById('btnStartScan');
-  if(scanBtn) scanBtn.disabled = false;
-  onEmployeeChange(); // re-applies correct IN/OUT button state now that GPS gate is lifted
-}
-
-function isMobileDevice(){
-  const ua = navigator.userAgent || navigator.vendor || window.opera || "";
-  const uaMobile = /android|iphone|ipad|ipod|iemobile|blackberry|opera mini|mobile/i.test(ua);
-  const touchAndSmall = (('ontouchstart' in window) || navigator.maxTouchPoints > 0) && window.innerWidth <= 1024;
-  return uaMobile || touchAndSmall;
-}
-
-function setupDeviceFlow(){
-  const mobile = isMobileDevice();
-  document.getElementById('desktopFlow').style.display = mobile ? 'none' : 'block';
-  document.getElementById('mobileFlow').style.display = mobile ? 'block' : 'none';
-  document.getElementById('manualBtnRow').style.display = mobile ? 'none' : 'flex';
-}
-
-function openRequestFlow(){
-  stopScan();
-  document.getElementById('mobileFlow').style.display = 'none';
-  document.getElementById('requestFlow').style.display = 'block';
-  document.getElementById('requestEmpSelect').innerHTML = '<option value="">-- Select your name --</option>' +
-    roster.map(e => `<option value="${e.id}">${e.name} (${e.id})</option>`).join('');
-  document.getElementById('tempPinEntry').style.display = 'none';
-  document.getElementById('requestStatus').style.display = 'none';
-}
-
-function closeRequestFlow(){
-  document.getElementById('requestFlow').style.display = 'none';
-  document.getElementById('mobileFlow').style.display = 'block';
-}
-
-async function submitAdminRequest(){
-  const empId = document.getElementById('requestEmpSelect').value;
-  if(!empId){ alert('Select your name first'); return; }
-  const emp = roster.find(e => e.id === empId);
-  const statusEl = document.getElementById('requestStatus');
-  statusEl.style.display = 'block';
-  statusEl.className = 'status-box';
-  statusEl.textContent = 'Sending request…';
-
-  const result = await apiCall({action:'requestAdminApproval', empId, empName: emp.name});
-  if(result && result.success){
-    statusEl.textContent = `Request sent for ${emp.name}. Call your admin now — once they approve, enter the temporary PIN they give you below.`;
-    statusEl.className = 'status-box ok';
-    document.getElementById('tempPinEntry').style.display = 'block';
-    window._pendingRequestEmp = emp;
-  } else if(result && result.error){
-    statusEl.textContent = 'Server error: ' + result.error + ' — make sure your Google Sheet has a "Requests" tab with the correct headers.';
-    statusEl.className = 'status-box err';
-  } else {
-    statusEl.textContent = 'Could not reach the server — check your internet connection and try again';
-    statusEl.className = 'status-box err';
-  }
-}
-
-async function submitTempPin(){
-  const emp = window._pendingRequestEmp;
-  if(!emp){ alert('Please submit a request first'); return; }
-  const pin = document.getElementById('tempPinInput').value.trim();
-  if(!/^\d{4}$/.test(pin)){ alert('Enter the 4-digit code exactly as given'); return; }
-
-  const check = await apiCall({action:'verifyTempPin', empId: emp.id, pin});
-  const statusEl = document.getElementById('requestStatus');
-  if(check && check.valid){
-    statusEl.textContent = 'Approved! Processing your punch…';
-    statusEl.className = 'status-box ok';
-    document.getElementById('requestFlow').style.display = 'none';
-    document.getElementById('mobileFlow').style.display = 'block';
-    document.getElementById('miniLoadingOverlay').style.display = 'block';
-    try{
-      await identifyEmployeeAndPunch(emp.id, emp.name);
-    } finally {
-      document.getElementById('miniLoadingOverlay').style.display = 'none';
-    }
-  } else {
-    statusEl.textContent = (check && check.error) ? check.error : 'Incorrect or expired code';
-    statusEl.className = 'status-box err';
-  }
-}
-
-let torchOn = false;
-async function toggleTorch(){
-  if(!window._quaggaTrack) return;
-  try{
-    torchOn = !torchOn;
-    await window._quaggaTrack.applyConstraints({ advanced: [{ torch: torchOn }] });
-    document.getElementById('btnTorch').textContent = torchOn ? '🔦 Torch On' : '🔦 Torch';
-  }catch(e){
-    console.warn('Torch not supported on this device', e);
-  }
-}
-
-function vibrateDevice(pattern){
-  if(navigator.vibrate){ navigator.vibrate(pattern); }
-}
-
-function showModal(icon, title, sub, autoCloseMs){
-  const modal = document.getElementById('greetModal');
-  document.getElementById('greetIcon').textContent = icon;
-  document.getElementById('greetTitle').textContent = title;
-  document.getElementById('greetSub').textContent = sub;
-  modal.classList.add('show');
-  if(autoCloseMs){
-    setTimeout(()=>{ modal.classList.remove('show'); }, autoCloseMs);
-  }
-}
-
-function timeGreeting(){
-  const h = new Date().getHours();
-  if(h < 12) return 'Good morning';
-  if(h < 17) return 'Good afternoon';
-  return 'Good evening';
-}
-
-function getInitials(name){
-  return (name || '?').trim().split(/\s+/).map(w=>w[0].toUpperCase()).slice(0,2).join('');
-}
-
-function formatTodayDate(){
-  const d = new Date();
-  const main = `${d.getDate()} ${d.toLocaleString('en-US',{month:'short'})} ${d.getFullYear()}`;
-  const sub = d.toLocaleString('en-US',{weekday:'long'});
-  return { main, sub };
-}
-
-function showEmployeeCard(emp){
-  document.getElementById('avatarCircle').textContent = getInitials(emp.name);
-  document.getElementById('empGreet').textContent = timeGreeting() + ',';
-  document.getElementById('empCardName').textContent = emp.name;
-  document.getElementById('empCardId').textContent = emp.id;
-  const d = formatTodayDate();
-  document.getElementById('empCardDate').innerHTML = `<b>${d.main}</b>${d.sub}`;
-  document.getElementById('empCard').classList.add('show');
-}
-
-function hideEmployeeCard(){
-  document.getElementById('empCard').classList.remove('show');
-  stopWorkTimer();
-  document.getElementById('activityCard').classList.remove('show');
-  document.getElementById('assignmentCard').style.display = 'none';
-}
-
-let workTimerInterval = null;
-let suppressActivityDisplay = false;
-function startWorkTimer(isoTimestamp, displaySince){
-  stopWorkTimer();
-  document.getElementById('wbSince').textContent = 'Since ' + (displaySince || '—');
-  document.getElementById('workingBanner').classList.add('show');
-  function update(){
-    const startMs = new Date(isoTimestamp).getTime();
-    const diff = Math.max(0, Date.now() - startMs);
-    const hours = Math.floor(diff / 3600000);
-    const mins = Math.floor((diff % 3600000) / 60000);
-    document.getElementById('wbTimer').textContent =
-      `${String(hours).padStart(2,'0')}h ${String(mins).padStart(2,'0')}m`;
-  }
-  update();
-  workTimerInterval = setInterval(update, 30000);
-}
-function stopWorkTimer(){
-  if(workTimerInterval) clearInterval(workTimerInterval);
-  workTimerInterval = null;
-  document.getElementById('workingBanner').classList.remove('show');
-}
-
-async function renderTodayActivity(empId){
-  const card = document.getElementById('activityCard');
-  const list = document.getElementById('activityList');
-  if(suppressActivityDisplay){
-    card.classList.remove('show');
-    return;
-  }
-  card.classList.add('show');
-  list.innerHTML = '<div class="loading">Loading…</div>';
-
-  const log = await apiCall({action:'getLog'}) || [];
-  const todayStr = new Date().toLocaleDateString('en-IN');
-  let todays = log.filter(r => r.empId === empId && r.displayTime && r.displayTime.split(',')[0].trim() === todayStr);
-  todays = todays.slice().reverse(); // chronological, oldest first
-
-  if(todays.length === 0){
-    list.innerHTML = '<div class="loading">No activity yet today.</div>';
-    return;
-  }
-
-  list.innerHTML = todays.map(r=>{
-    const isIn = r.type === 'IN';
-    const title = isIn ? 'Punched In' : 'Punched Out';
-    const sub = isIn
-      ? (r.lat ? 'Location verified' : 'No location captured')
-      : (r.workNote ? (r.workNote.length > 50 ? r.workNote.slice(0,50)+'…' : r.workNote) : 'Work update added');
-    const timePart = r.displayTime.split(',')[1] ? r.displayTime.split(',')[1].trim() : r.displayTime;
-    return `
-      <div class="activity-item">
-        <div class="activity-dot ${isIn?'in':'out'}">${isIn?'✓':'⏱'}</div>
-        <div>
-          <div class="activity-title">${title}</div>
-          <div class="activity-sub">${sub}</div>
-        </div>
-        <div class="activity-time">${timePart}</div>
-      </div>
-    `;
-  }).join('');
-}
-
-// Unified refresh used by both desktop (name-select) and mobile (scan) identification paths
-async function refreshEmployeeUI(empId, empName){
-  if(!empId) return;
-  const emp = roster.find(e => e.id === empId) || {id: empId, name: empName};
-  showEmployeeCard(emp);
-  const status = await apiCall({action:'getStatus', empId});
-  if(status && status.lastType === 'IN'){
-    startWorkTimer(status.lastTimestamp, status.lastTime);
-    startLocationPinging(empId, empName); // resume pinging if already mid-shift (e.g. after refresh)
-  } else {
-    stopWorkTimer();
-    stopLocationPinging();
-  }
-  await renderTodayActivity(empId);
-  await showTodayAssignment(empId);
-}
-
-async function showTodayAssignment(empId){
-  const card = document.getElementById('assignmentCard');
-  const assignment = await apiCall({action:'getTodayAssignment', empId});
-  if(assignment && assignment.siteName){
-    const sites = await apiCall({action:'getSites'}) || [];
-    const site = sites.find(s => s.siteId === assignment.siteId) || {};
-    document.getElementById('assignmentSiteName').textContent = assignment.siteName;
-    document.getElementById('assignmentSiteAddress').textContent = site.address || '';
-    document.getElementById('assignmentSiteContact').textContent = site.contact ? ('📞 ' + site.contact) : '';
-    card.style.display = 'block';
-  } else {
-    card.style.display = 'none';
-  }
-}
-
-// Periodic location pings while punched in — every 10 minutes, only while the app stays open
-let pingInterval = null;
-function startLocationPinging(empId, empName){
-  if(pingInterval) return; // already running
-  pingInterval = setInterval(()=>{
-    if(!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition((pos)=>{
-      apiCall({
-        action: 'logPing',
-        empId, empName,
-        lat: pos.coords.latitude.toFixed(5),
-        lng: pos.coords.longitude.toFixed(5)
-      });
-    }, ()=>{ /* ignore failures silently, next cycle will retry */ });
-  }, 600000); // 10 minutes
-}
-function stopLocationPinging(){
-  if(pingInterval){ clearInterval(pingInterval); pingInterval = null; }
-}
-
-let scanning = false;
-let lastScanCode = null;
-let lastScanTime = 0;
-
-function startScan(){
-  if(!gpsReady){ alert('Please wait for location to finish loading first.'); return; }
-  document.getElementById('scannerWrap').style.display = 'block';
-  document.getElementById('btnStartScan').style.display = 'none';
-  document.getElementById('btnStopScan').style.display = 'block';
-  const statusEl = document.getElementById('scanStatus');
-  statusEl.style.display = 'block';
-  statusEl.className = 'status-box';
-  statusEl.textContent = 'Point the camera at the barcode on your ID card…';
-
-  Quagga.init({
-    inputStream: {
-      type: "LiveStream",
-      target: document.getElementById('scannerWrap'),
-      constraints: { facingMode: "environment" }
-    },
-    decoder: { readers: ["code_128_reader"] },
-    locate: true
-  }, function(err){
-    if(err){
-      statusEl.textContent = 'Camera error: ' + err.message + ' — check camera permission in your browser settings';
-      statusEl.className = 'status-box err';
-      return;
-    }
-    Quagga.start();
-    scanning = true;
-
-    // Check if this camera supports a torch, show the button only if so
-    try{
-      const track = Quagga.CameraAccess.getActiveTrack();
-      window._quaggaTrack = track;
-      const caps = track && track.getCapabilities ? track.getCapabilities() : {};
-      if(caps && caps.torch){
-        document.getElementById('btnTorch').style.display = 'block';
-      }
-    }catch(e){ /* torch not available, ignore */ }
-  });
-
-  Quagga.onDetected(onScanDetected);
-}
-
-function stopScan(){
-  if(scanning){
-    Quagga.offDetected(onScanDetected);
-    Quagga.stop();
-    scanning = false;
-  }
-  document.getElementById('scannerWrap').style.display = 'none';
-  document.getElementById('scannerWrap').innerHTML = '<div class="scan-frame"><div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div></div><div class="scan-line"></div><button type="button" class="torch-btn" id="btnTorch" onclick="toggleTorch()" style="display:none;">🔦 Torch</button>';
-  document.getElementById('btnStartScan').style.display = 'block';
-  document.getElementById('btnStopScan').style.display = 'none';
-  torchOn = false;
-  window._quaggaTrack = null;
-}
-
-async function onScanDetected(result){
-  const code = result.codeResult.code;
-  const now = Date.now();
-  if(code === lastScanCode && (now - lastScanTime) < 5000) return; // ignore duplicate reads of the same card
-  lastScanCode = code;
-  lastScanTime = now;
-
-  const statusEl = document.getElementById('scanStatus');
-  const emp = roster.find(e => e.id === code);
-  if(!emp){
-    vibrateDevice(100);
-    statusEl.textContent = `Scanned "${code}" — not found in the crew list`;
-    statusEl.className = 'status-box err';
-    return;
-  }
-
-  vibrateDevice([60, 40, 60]); // short-pause-short confirms a good read
-  stopScan();
-  document.getElementById('miniLoadingOverlay').style.display = 'block';
-  statusEl.textContent = `Identified: ${emp.name} — checking status…`;
-  statusEl.className = 'status-box ok';
-  try{
-    await identifyEmployeeAndPunch(emp.id, emp.name);
-  } finally {
-    document.getElementById('miniLoadingOverlay').style.display = 'none';
-  }
-}
-
-function updateScanButtonColor(nextAction){
-  const btn = document.getElementById('btnStartScan');
-  btn.classList.remove('btn-in','btn-out');
-  if(nextAction === 'OUT'){
-    btn.classList.add('btn-out');
-    btn.textContent = '🔴 Start Scanning (Punch OUT)';
-  } else {
-    btn.classList.add('btn-in');
-    btn.textContent = '🟢 Start Scanning (Punch IN)';
-  }
-}
-
-// Used by the scan flow AND the admin-approval flow: identifies the employee and
-// immediately performs the correct action — auto Punch IN, or opens the work-update
-// form for Punch OUT (matches the original simple "just scan" behavior).
-async function identifyEmployeeAndPunch(empId, empName){
-  pendingPunch = {empId, empName};
-  localStorage.setItem('tazat_last_emp', JSON.stringify({empId, empName}));
-  const statusEl = document.getElementById('scanStatus');
-  statusEl.style.display = 'block';
-  await refreshEmployeeUI(empId, empName);
-  const status = await apiCall({action:'getStatus', empId});
-  if(!status){
-    statusEl.textContent = 'Could not check status — try scanning again';
-    statusEl.className = 'status-box err';
-    return;
-  }
-  if(status.lastType === 'IN'){
-    updateScanButtonColor('OUT');
-    statusEl.textContent = `${empName}: currently punched IN — add your work update below to punch out`;
-    statusEl.className = 'status-box ok';
-    document.getElementById('outDetails').classList.add('show');
-    document.getElementById('workNote').focus();
-  } else {
-    await savePunch('IN', null, null);
-    updateScanButtonColor('OUT'); // now that they're punched in, next scan should punch them out
-    statusEl.textContent = `✓ Punched IN for ${empName}`;
-    statusEl.className = 'status-box ok';
-  }
-}
-
-// Used only on page load to restore visual continuity after a refresh —
-// shows the card/timer/status but does NOT auto-punch or force the OUT form open.
-async function restoreMobileSessionDisplay(empId, empName){
-  pendingPunch = {empId, empName};
-  await refreshEmployeeUI(empId, empName);
-  const status = await apiCall({action:'getStatus', empId});
-  const statusEl = document.getElementById('scanStatus');
-  statusEl.style.display = 'block';
-  if(status && status.lastType === 'IN'){
-    updateScanButtonColor('OUT');
-    statusEl.textContent = `Welcome back, ${empName} — scan again to punch out.`;
-    statusEl.className = 'status-box ok';
-  } else {
-    updateScanButtonColor('IN');
-    statusEl.textContent = `Welcome back, ${empName} — scan again to punch in.`;
-    statusEl.className = 'status-box';
-  }
-}
-
+// ---------------- PIN self-service ----------------
 async function onEmployeeChange(){
   const empId = document.getElementById('empSelect').value;
   const statusBox = document.getElementById('empStatus');
@@ -1548,10 +557,7 @@ async function onEmployeeChange(){
   statusBox.textContent = 'Checking status…';
 
   const status = await apiCall({action:'getStatus', empId});
-  if(!status){
-    statusBox.textContent = 'Could not check status — try again';
-    return;
-  }
+  if(!status){ statusBox.textContent = 'Could not check status — try again'; return; }
 
   if(status.lastType === 'IN'){
     statusBox.textContent = `🟢 Currently punched IN since ${status.lastTime}`;
@@ -1580,6 +586,8 @@ async function startPunch(type){
   pendingPunch = {empId: emp.id, empName: emp.name};
 
   if(type === 'IN'){
+    const workType = await pickWorkType(emp.department);
+    currentWorkType = workType;
     await savePunch('IN', null, null);
   } else {
     document.getElementById('outDetails').classList.add('show');
@@ -1587,8 +595,6 @@ async function startPunch(type){
   }
 }
 
-// Handles both "first time — set a PIN" and "already have one — verify it" cases.
-// Returns true if the employee is cleared to punch, false if they cancelled or failed.
 async function ensurePinReady(empId, empName){
   const hasPinResult = await apiCall({action:'hasPin', empId});
   if(!hasPinResult){ alert('Could not reach the server — check your internet connection.'); return false; }
@@ -1610,10 +616,7 @@ async function ensurePinReady(empId, empName){
   const pin = prompt(`Enter ${empName}'s 4-digit PIN to confirm it's really you:`);
   if(pin === null) return false;
   const check = await apiCall({action:'verifyPin', empId, pin});
-  if(!check || !check.valid){
-    alert('Incorrect PIN — punch not recorded.');
-    return false;
-  }
+  if(!check || !check.valid){ alert('Incorrect PIN — punch not recorded.'); return false; }
   return true;
 }
 
@@ -1638,10 +641,76 @@ async function changePinFlow(){
   if(newPin1 !== newPin2){ alert('New PINs did not match — try again.'); return; }
 
   const result = await apiCall({action:'changePin', empId, oldPin, newPin: newPin1});
-  if(result && result.success){
-    alert('PIN changed successfully.');
+  alert(result && result.success ? 'PIN changed successfully.' : (result && result.error ? result.error : 'Could not change PIN — try again.'));
+}
+
+// ---------------- Work type picker (modal) ----------------
+function pickWorkType(department){
+  return new Promise((resolve)=>{
+    const options = WORK_TYPES[department] || [];
+    if(options.length === 0){ resolve(''); return; }
+    const modal = document.getElementById('workTypeModal');
+    const wrap = document.getElementById('workTypeOptions');
+    wrap.innerHTML = options.map(opt => `<button class="worktype-btn" data-opt="${opt}">${opt}</button>`).join('');
+    modal.classList.add('show');
+    wrap.querySelectorAll('.worktype-btn').forEach(btn=>{
+      btn.onclick = ()=>{
+        modal.classList.remove('show');
+        resolve(btn.getAttribute('data-opt'));
+      };
+    });
+  });
+}
+
+// ---------------- Punch save ----------------
+async function savePunch(type, status, note){
+  if(!apiConfigured()){ alert('Setup not complete yet — the Google Sheet link needs to be added to this page first.'); return; }
+  document.getElementById('btnIn').disabled = true;
+  document.getElementById('btnOut').disabled = true;
+
+  const now = new Date();
+  const record = {
+    empId: pendingPunch.empId, empName: pendingPunch.empName, type,
+    timestamp: now.toISOString(), displayTime: now.toLocaleString('en-IN'),
+    lat: currentCoords ? currentCoords.lat : '', lng: currentCoords ? currentCoords.lng : '',
+    workStatus: status || '', workNote: note || '', workType: type === 'IN' ? currentWorkType : ''
+  };
+
+  const result = await apiCall({action:'addPunch', ...record});
+
+  if(result && result.success === false){
+    document.getElementById('lastPunch').textContent = '✗ ' + (result.error || 'Punch rejected');
+  } else if(result){
+    document.getElementById('lastPunch').textContent =
+      `✓ Punched ${type} for ${record.empName} at ${record.displayTime}${currentCoords ? ' ('+currentCoords.lat+', '+currentCoords.lng+')' : ' (no GPS)'}`;
+
+    const firstName = record.empName.split(' ')[0];
+    if(type === 'IN'){
+      showModal('👋', `${timeGreeting()}, ${firstName}!`, "You're punched in. Have a great, safe day at work.", 5000);
+      const emp = roster.find(e => e.id === record.empId);
+      if(emp && VISIT_ENABLED_DEPTS.includes(emp.department)){
+        document.getElementById('btnLogVisit').style.display = 'block';
+        document.getElementById('todaysVisitsWrap').style.display = 'block';
+      }
+      startLocationPinging(record.empId, record.empName);
+    } else {
+      showModal('🙏', `Thank you, ${firstName}!`, 'Thanks for your hard work today. See you next time.', 5000);
+      localStorage.removeItem('tazat_last_emp');
+      updateScanButtonColor('IN');
+      document.getElementById('btnLogVisit').style.display = 'none';
+      document.getElementById('visitForm').classList.remove('show');
+      stopLocationPinging();
+    }
   } else {
-    alert(result && result.error ? result.error : 'Could not change PIN — try again.');
+    document.getElementById('lastPunch').textContent = 'Failed to save punch — check your internet connection and try again';
+  }
+
+  await onEmployeeChange();
+  await refreshEmployeeUI(pendingPunch.empId, pendingPunch.empName);
+
+  if(type === 'OUT' && result && result.success !== false){
+    document.getElementById('activityCard').classList.remove('show');
+    document.getElementById('todaysVisitsWrap').style.display = 'none';
   }
 }
 
@@ -1663,184 +732,278 @@ async function confirmPunchOut(){
   document.getElementById('workNote').value = '';
 }
 
-async function savePunch(type, status, note){
-  if(!apiConfigured()){
-    alert('Setup not complete yet — the Google Sheet link needs to be added to this page first.');
-    return;
-  }
-  document.getElementById('btnIn').disabled = true;
-  document.getElementById('btnOut').disabled = true;
-
-  const now = new Date();
-  const record = {
-    empId: pendingPunch.empId,
-    empName: pendingPunch.empName,
-    type: type,
-    timestamp: now.toISOString(),
-    displayTime: now.toLocaleString('en-IN'),
-    lat: currentCoords ? currentCoords.lat : '',
-    lng: currentCoords ? currentCoords.lng : '',
-    workStatus: status || '',
-    workNote: note || ''
+// ---------------- Visit logging ----------------
+function openVisitForm(){
+  document.getElementById('visitForm').classList.add('show');
+  document.getElementById('visitHospitalName').focus();
+}
+function closeVisitForm(){
+  document.getElementById('visitForm').classList.remove('show');
+  document.getElementById('visitHospitalName').value = '';
+  document.getElementById('visitNote').value = '';
+  document.getElementById('visitPhotoInput').value = '';
+  document.getElementById('visitPhotoPreview').style.display = 'none';
+}
+function previewVisitPhoto(){
+  const file = document.getElementById('visitPhotoInput').files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (e)=>{
+    const img = document.getElementById('visitPhotoPreview');
+    img.src = e.target.result;
+    img.style.display = 'block';
   };
-
-  const result = await apiCall({action:'addPunch', ...record});
-
-  if(result && result.success === false){
-    document.getElementById('lastPunch').textContent = '✗ ' + (result.error || 'Punch rejected');
-  } else if(result){
-    document.getElementById('lastPunch').textContent =
-      `✓ Punched ${type} for ${record.empName} at ${record.displayTime}${currentCoords ? ' ('+currentCoords.lat+', '+currentCoords.lng+')' : ' (no GPS)'}`;
-
-    const firstName = record.empName.split(' ')[0];
-    if(type === 'IN'){
-      showModal('👋', `${timeGreeting()}, ${firstName}!`, "You're punched in. Have a great, safe day at work.", 5000);
-    } else {
-      showModal('🙏', `Thank you, ${firstName}!`, 'Thanks for your hard work today. See you next time.', 5000);
-      // Shift complete — clear this device's remembered session, reset scan button to green
-      localStorage.removeItem('tazat_last_emp');
-      updateScanButtonColor('IN');
-    }
-  } else {
-    document.getElementById('lastPunch').textContent = 'Failed to save punch — check your internet connection and try again';
-  }
-
-  await onEmployeeChange(); // refresh desktop status + button states (no-op if on mobile flow)
-  await refreshEmployeeUI(pendingPunch.empId, pendingPunch.empName); // refresh timer + activity feed either way
-
-  if(type === 'OUT' && result && result.success !== false){
-    // Hide Today's Activity after a completed punch-out — must happen AFTER refreshEmployeeUI,
-    // since that call re-shows it via renderTodayActivity.
-    document.getElementById('activityCard').classList.remove('show');
-  }
+  reader.readAsDataURL(file);
 }
 
-async function loadLog(){
-  const wrap = document.getElementById('logTableWrap');
-  wrap.innerHTML = '<div class="loading">Loading log…</div>';
-  if(!apiConfigured()){
-    wrap.innerHTML = '<div class="loading">Google Sheet not connected yet.</div>';
-    document.getElementById('dailyExportWrap').innerHTML = '';
+async function submitVisit(){
+  if(!pendingPunch){ alert('Punch in first'); return; }
+  const hospitalName = document.getElementById('visitHospitalName').value.trim();
+  if(!hospitalName){ alert('Enter the hospital/clinic name'); return; }
+  const note = document.getElementById('visitNote').value.trim();
+  const fileInput = document.getElementById('visitPhotoInput');
+
+  const btn = document.getElementById('btnSubmitVisit');
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="processing-text"><span class="spinner"></span> Saving…</span>';
+
+  let photoUrl = '';
+  if(fileInput.files[0]){
+    const base64Data = await fileToBase64(fileInput.files[0]);
+    const uploadResult = await apiPost({
+      action: 'uploadVisitPhoto', empId: pendingPunch.empId,
+      base64Data, mimeType: fileInput.files[0].type
+    });
+    if(uploadResult && uploadResult.success){ photoUrl = uploadResult.url; }
+  }
+
+  await apiCall({
+    action:'logVisit', empId: pendingPunch.empId, empName: pendingPunch.empName,
+    hospitalName, note, photoUrl,
+    lat: currentCoords ? currentCoords.lat : '', lng: currentCoords ? currentCoords.lng : ''
+  });
+
+  btn.disabled = false;
+  btn.textContent = originalText;
+  closeVisitForm();
+  await loadTodaysVisits(pendingPunch.empId);
+}
+
+function fileToBase64(file){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onload = ()=> resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function loadTodaysVisits(empId){
+  const visits = await apiCall({action:'getVisits', empId}) || [];
+  const todayStr = new Date().toLocaleDateString('en-GB').split('/').join('/'); // dd/mm/yyyy roughly
+  const todays = visits.filter(v => v.date === Utilities_today());
+  const wrap = document.getElementById('todaysVisitsList');
+  if(todays.length === 0){
+    wrap.innerHTML = '<div class="loading">No visits logged yet today.</div>';
     return;
   }
-  const summary = await apiCall({action:'getSummary'}) || [];
-  cachedLog = summary;
-  if(summary.length === 0){
-    wrap.innerHTML = '<div class="loading">No completed shifts yet — shows up here once someone punches OUT.</div>';
-    document.getElementById('dailyExportWrap').innerHTML = '<div class="loading">No completed shifts yet.</div>';
-    return;
-  }
-  let html = '<table><tr><th>Date</th><th>Employee</th><th>In</th><th>Out</th><th>Hours</th><th>Status</th><th>Work Note</th></tr>';
-  summary.forEach(r=>{
-    const badge = r.workStatus ? `<span class="badge ${r.workStatus.toLowerCase()}">${r.workStatus}</span>` : '—';
-    html += `<tr><td>${r.date}</td><td>${r.empName}</td><td>${r.inTime}</td><td>${r.outTime}</td><td>${r.hoursWorked || '—'}</td><td>${badge}</td><td>${r.workNote || '—'}</td></tr>`;
-  });
-  html += '</table>';
-  wrap.innerHTML = html;
-
-  renderDailyExport(summary);
-}
-
-// Groups summary rows by their Date field (already computed server-side from the punch-in date)
-function groupByDate(summary){
-  const groups = {};
-  summary.forEach(r=>{
-    const dateKey = r.date || 'Unknown date';
-    if(!groups[dateKey]) groups[dateKey] = [];
-    groups[dateKey].push(r);
-  });
-  return groups;
-}
-
-function renderDailyExport(summary){
-  const wrap = document.getElementById('dailyExportWrap');
-  const groups = groupByDate(summary);
-  const dates = Object.keys(groups).sort((a,b)=>{
-    const [da,ma,ya] = a.split('/'); const [db,mb,yb] = b.split('/');
-    return new Date(yb,mb-1,db) - new Date(ya,ma-1,da);
-  });
-
-  wrap.innerHTML = dates.map(dateKey=>{
-    const records = groups[dateKey];
-    const empCount = new Set(records.map(r=>r.empId)).size;
-    return `
-      <div class="roster-item">
-        <span>
-          <b>${dateKey}</b>
-          <br><span style="color:#888;">${records.length} completed shifts · ${empCount} employees</span>
-        </span>
-        <button class="small-btn" onclick="exportDayExcel('${dateKey}')">Export .xlsx</button>
+  wrap.innerHTML = todays.map(v => `
+    <div class="visit-list-item">
+      ${v.photoUrl ? `<img src="${v.photoUrl}">` : '<div style="width:40px;height:40px;background:#eee;border-radius:6px;flex-shrink:0;"></div>'}
+      <div>
+        <div class="vname">${v.hospitalName}</div>
+        <div class="vnote">${v.note || ''}</div>
       </div>
-    `;
+    </div>
+  `).join('');
+}
+
+function Utilities_today(){
+  const d = new Date();
+  return `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
+}
+
+// ---------------- Employee card / timer / activity ----------------
+function timeGreeting(){
+  const h = new Date().getHours();
+  if(h < 12) return 'Good morning';
+  if(h < 17) return 'Good afternoon';
+  return 'Good evening';
+}
+function getInitials(name){ return (name || '?').trim().split(/\s+/).map(w=>w[0].toUpperCase()).slice(0,2).join(''); }
+function formatTodayDate(){
+  const d = new Date();
+  return { main: `${d.getDate()} ${d.toLocaleString('en-US',{month:'short'})} ${d.getFullYear()}`, sub: d.toLocaleString('en-US',{weekday:'long'}) };
+}
+function showEmployeeCard(emp){
+  document.getElementById('avatarCircle').textContent = getInitials(emp.name);
+  document.getElementById('empGreet').textContent = timeGreeting() + ',';
+  document.getElementById('empCardName').textContent = emp.name;
+  document.getElementById('empCardId').textContent = emp.id;
+  const d = formatTodayDate();
+  document.getElementById('empCardDate').innerHTML = `<b>${d.main}</b>${d.sub}`;
+  document.getElementById('empCard').classList.add('show');
+}
+function hideEmployeeCard(){
+  document.getElementById('empCard').classList.remove('show');
+  stopWorkTimer();
+  document.getElementById('activityCard').classList.remove('show');
+  document.getElementById('todaysVisitsWrap').style.display = 'none';
+  document.getElementById('btnLogVisit').style.display = 'none';
+}
+
+let workTimerInterval = null;
+function startWorkTimer(isoTimestamp, displaySince){
+  stopWorkTimer();
+  document.getElementById('wbSince').textContent = 'Since ' + (displaySince || '—');
+  document.getElementById('workingBanner').classList.add('show');
+  function update(){
+    const diff = Math.max(0, Date.now() - new Date(isoTimestamp).getTime());
+    const hours = Math.floor(diff / 3600000);
+    const mins = Math.floor((diff % 3600000) / 60000);
+    document.getElementById('wbTimer').textContent = `${String(hours).padStart(2,'0')}h ${String(mins).padStart(2,'0')}m`;
+  }
+  update();
+  workTimerInterval = setInterval(update, 30000);
+}
+function stopWorkTimer(){
+  if(workTimerInterval) clearInterval(workTimerInterval);
+  workTimerInterval = null;
+  document.getElementById('workingBanner').classList.remove('show');
+}
+
+async function renderTodayActivity(empId){
+  const card = document.getElementById('activityCard');
+  const list = document.getElementById('activityList');
+  card.classList.add('show');
+  list.innerHTML = '<div class="loading">Loading…</div>';
+
+  const log = await apiCall({action:'getLog'}) || [];
+  const todayStr = new Date().toLocaleDateString('en-IN');
+  let todays = log.filter(r => r.empId === empId && r.displayTime && r.displayTime.split(',')[0].trim() === todayStr);
+  todays = todays.slice().reverse();
+
+  if(todays.length === 0){ list.innerHTML = '<div class="loading">No activity yet today.</div>'; return; }
+
+  list.innerHTML = todays.map(r=>{
+    const isIn = r.type === 'IN';
+    const title = isIn ? `Punched In${r.workType ? ' — '+r.workType : ''}` : 'Punched Out';
+    const sub = isIn ? (r.lat ? 'Location verified' : 'No location captured') : (r.workNote ? (r.workNote.length>50?r.workNote.slice(0,50)+'…':r.workNote) : 'Work update added');
+    const timePart = r.displayTime.split(',')[1] ? r.displayTime.split(',')[1].trim() : r.displayTime;
+    return `
+      <div class="activity-item">
+        <div class="activity-dot ${isIn?'in':'out'}">${isIn?'✓':'⏱'}</div>
+        <div><div class="activity-title">${title}</div><div class="activity-sub">${sub}</div></div>
+        <div class="activity-time">${timePart}</div>
+      </div>`;
   }).join('');
 }
 
-function exportDayExcel(dateKey){
-  const summary = cachedLog || [];
-  const groups = groupByDate(summary);
-  const records = groups[dateKey] || [];
-  if(records.length === 0){ alert('No records for this date'); return; }
-
-  records.sort((a,b)=> a.empName.localeCompare(b.empName));
-
-  const rows = records.map(r=>({
-    "Employee ID": r.empId,
-    "Employee Name": r.empName,
-    "Punch In": r.inTime,
-    "Punch Out": r.outTime,
-    "Hours Worked": r.hoursWorked,
-    "Work Status": r.workStatus || '',
-    "Work Note": r.workNote || ''
-  }));
-
-  const ws = XLSX.utils.json_to_sheet(rows);
-  ws['!cols'] = [{wch:12},{wch:22},{wch:20},{wch:20},{wch:12},{wch:12},{wch:45}];
-  const wb = XLSX.utils.book_new();
-  const safeSheetName = dateKey.replace(/\//g, '-');
-  XLSX.utils.book_append_sheet(wb, ws, safeSheetName);
-  XLSX.writeFile(wb, `TAZAT_Attendance_${safeSheetName}.xlsx`);
+async function refreshEmployeeUI(empId, empName){
+  if(!empId) return;
+  const emp = roster.find(e => e.id === empId) || {id: empId, name: empName};
+  showEmployeeCard(emp);
+  const status = await apiCall({action:'getStatus', empId});
+  if(status && status.lastType === 'IN'){
+    startWorkTimer(status.lastTimestamp, status.lastTime);
+    startLocationPinging(empId, empName);
+    if(VISIT_ENABLED_DEPTS.includes(emp.department)){
+      document.getElementById('btnLogVisit').style.display = 'block';
+      document.getElementById('todaysVisitsWrap').style.display = 'block';
+      await loadTodaysVisits(empId);
+    }
+  } else {
+    stopWorkTimer();
+    stopLocationPinging();
+  }
+  await renderTodayActivity(empId);
 }
 
-async function exportAllDaysExcel(){
-  const summary = cachedLog || [];
-  if(summary.length === 0){ alert('No data to export'); return; }
-  const groups = groupByDate(summary);
-  const wb = XLSX.utils.book_new();
-  Object.keys(groups).sort((a,b)=>{
-    const [da,ma,ya] = a.split('/'); const [db,mb,yb] = b.split('/');
-    return new Date(ya,ma-1,da) - new Date(yb,mb-1,db);
-  }).forEach(dateKey=>{
-    const records = groups[dateKey].slice().sort((a,b)=> a.empName.localeCompare(b.empName));
-    const rows = records.map(r=>({
-      "Employee ID": r.empId,
-      "Employee Name": r.empName,
-      "Punch In": r.inTime,
-      "Punch Out": r.outTime,
-      "Hours Worked": r.hoursWorked,
-      "Work Status": r.workStatus || '',
-      "Work Note": r.workNote || ''
-    }));
-    const ws = XLSX.utils.json_to_sheet(rows);
-    ws['!cols'] = [{wch:12},{wch:22},{wch:20},{wch:20},{wch:12},{wch:12},{wch:45}];
-    XLSX.utils.book_append_sheet(wb, ws, dateKey.replace(/\//g, '-'));
-  });
-  XLSX.writeFile(wb, 'TAZAT_Attendance_AllDays.xlsx');
+// Periodic location pings while punched in — every 10 minutes
+let pingInterval = null;
+function startLocationPinging(empId, empName){
+  if(pingInterval) return;
+  pingInterval = setInterval(()=>{
+    if(!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition((pos)=>{
+      apiCall({action:'logPing', empId, empName, lat: pos.coords.latitude.toFixed(5), lng: pos.coords.longitude.toFixed(5)});
+    }, ()=>{});
+  }, 600000);
+}
+function stopLocationPinging(){ if(pingInterval){ clearInterval(pingInterval); pingInterval = null; } }
+
+function showModal(icon, title, sub, autoCloseMs){
+  const modal = document.getElementById('greetModal');
+  document.getElementById('greetIcon').textContent = icon;
+  document.getElementById('greetTitle').textContent = title;
+  document.getElementById('greetSub').textContent = sub;
+  modal.classList.add('show');
+  if(autoCloseMs) setTimeout(()=>{ modal.classList.remove('show'); }, autoCloseMs);
 }
 
-async function exportCSV(){
-  const summary = cachedLog || [];
-  if(summary.length === 0){ alert('No data to export'); return; }
-  let csv = 'Date,Employee ID,Employee Name,Punch In,Punch Out,Hours Worked,Work Status,Work Note\n';
-  summary.forEach(r=>{
-    const note = (r.workNote || '').replace(/"/g, '""');
-    csv += `${r.date},${r.empId},${r.empName},${r.inTime},${r.outTime},${r.hoursWorked||''},${r.workStatus||''},"${note}"\n`;
-  });
-  const blob = new Blob([csv], {type:'text/csv'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'TAZAT_attendance_summary.csv';
-  a.click();
+// ---------------- Device detection & flows ----------------
+function isMobileDevice(){
+  const ua = navigator.userAgent || navigator.vendor || window.opera || "";
+  const uaMobile = /android|iphone|ipad|ipod|iemobile|blackberry|opera mini|mobile/i.test(ua);
+  const touchAndSmall = (('ontouchstart' in window) || navigator.maxTouchPoints > 0) && window.innerWidth <= 1024;
+  return uaMobile || touchAndSmall;
+}
+function setupDeviceFlow(){
+  const mobile = isMobileDevice();
+  document.getElementById('desktopFlow').style.display = mobile ? 'none' : 'block';
+  document.getElementById('mobileFlow').style.display = mobile ? 'block' : 'none';
+  document.getElementById('manualBtnRow').style.display = mobile ? 'none' : 'flex';
+}
+
+function updateScanButtonColor(nextAction){
+  const btn = document.getElementById('btnStartScan');
+  btn.classList.remove('btn-in','btn-out');
+  if(nextAction === 'OUT'){ btn.classList.add('btn-out'); btn.textContent = '🔴 Start Scanning (Punch OUT)'; }
+  else { btn.classList.add('btn-in'); btn.textContent = '🟢 Start Scanning (Punch IN)'; }
+}
+
+async function identifyEmployeeAndPunch(empId, empName){
+  pendingPunch = {empId, empName};
+  localStorage.setItem('tazat_last_emp', JSON.stringify({empId, empName}));
+  const statusEl = document.getElementById('scanStatus');
+  statusEl.style.display = 'block';
+  await refreshEmployeeUI(empId, empName);
+  const status = await apiCall({action:'getStatus', empId});
+  if(!status){ statusEl.textContent = 'Could not check status — try scanning again'; statusEl.className = 'status-box err'; return; }
+
+  if(status.lastType === 'IN'){
+    updateScanButtonColor('OUT');
+    statusEl.textContent = `${empName}: currently punched IN — add your work update below to punch out`;
+    statusEl.className = 'status-box ok';
+    document.getElementById('outDetails').classList.add('show');
+    document.getElementById('workNote').focus();
+  } else {
+    const emp = roster.find(e => e.id === empId);
+    const workType = await pickWorkType(emp ? emp.department : '');
+    currentWorkType = workType;
+    await savePunch('IN', null, null);
+    updateScanButtonColor('OUT');
+    statusEl.textContent = `✓ Punched IN for ${empName}`;
+    statusEl.className = 'status-box ok';
+  }
+}
+
+async function restoreMobileSessionDisplay(empId, empName){
+  pendingPunch = {empId, empName};
+  await refreshEmployeeUI(empId, empName);
+  const status = await apiCall({action:'getStatus', empId});
+  const statusEl = document.getElementById('scanStatus');
+  statusEl.style.display = 'block';
+  if(status && status.lastType === 'IN'){
+    updateScanButtonColor('OUT');
+    statusEl.textContent = `Welcome back, ${empName} — scan again to punch out.`;
+    statusEl.className = 'status-box ok';
+  } else {
+    updateScanButtonColor('IN');
+    statusEl.textContent = `Welcome back, ${empName} — scan again to punch in.`;
+    statusEl.className = 'status-box';
+  }
 }
 
 function restoreMobileSession(){
@@ -1849,11 +1012,438 @@ function restoreMobileSession(){
   if(!saved) return;
   try{
     const parsed = JSON.parse(saved);
-    if(parsed && parsed.empId){
-      restoreMobileSessionDisplay(parsed.empId, parsed.empName);
-    }
+    if(parsed && parsed.empId) restoreMobileSessionDisplay(parsed.empId, parsed.empName);
   }catch(e){ console.warn('Could not restore mobile session', e); }
 }
+
+// ---------------- Barcode scanning ----------------
+let scanning = false;
+let lastScanCode = null;
+let lastScanTime = 0;
+
+function startScan(){
+  if(!gpsReady){ alert('Please wait for location to finish loading first.'); return; }
+  document.getElementById('scannerWrap').style.display = 'block';
+  document.getElementById('btnStartScan').style.display = 'none';
+  document.getElementById('btnStopScan').style.display = 'block';
+  const statusEl = document.getElementById('scanStatus');
+  statusEl.style.display = 'block';
+  statusEl.className = 'status-box';
+  statusEl.textContent = 'Point the camera at the barcode on your ID card…';
+
+  Quagga.init({
+    inputStream: { type: "LiveStream", target: document.getElementById('scannerWrap'), constraints: { facingMode: "environment" } },
+    decoder: { readers: ["code_128_reader"] },
+    locate: true
+  }, function(err){
+    if(err){ statusEl.textContent = 'Camera error: ' + err.message; statusEl.className = 'status-box err'; return; }
+    Quagga.start();
+    scanning = true;
+    try{
+      const track = Quagga.CameraAccess.getActiveTrack();
+      window._quaggaTrack = track;
+      const caps = track && track.getCapabilities ? track.getCapabilities() : {};
+      if(caps && caps.torch) document.getElementById('btnTorch').style.display = 'block';
+    }catch(e){}
+  });
+  Quagga.onDetected(onScanDetected);
+}
+
+function stopScan(){
+  if(scanning){ Quagga.offDetected(onScanDetected); Quagga.stop(); scanning = false; }
+  document.getElementById('scannerWrap').style.display = 'none';
+  document.getElementById('scannerWrap').innerHTML = '<div class="scan-frame"><div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div></div><div class="scan-line"></div><button type="button" class="torch-btn" id="btnTorch" onclick="toggleTorch()" style="display:none;">🔦 Torch</button>';
+  document.getElementById('btnStartScan').style.display = 'block';
+  document.getElementById('btnStopScan').style.display = 'none';
+  torchOn = false;
+  window._quaggaTrack = null;
+}
+
+let torchOn = false;
+async function toggleTorch(){
+  if(!window._quaggaTrack) return;
+  try{
+    torchOn = !torchOn;
+    await window._quaggaTrack.applyConstraints({ advanced: [{ torch: torchOn }] });
+    document.getElementById('btnTorch').textContent = torchOn ? '🔦 Torch On' : '🔦 Torch';
+  }catch(e){}
+}
+
+function vibrateDevice(pattern){ if(navigator.vibrate) navigator.vibrate(pattern); }
+
+async function onScanDetected(result){
+  const code = result.codeResult.code;
+  const now = Date.now();
+  if(code === lastScanCode && (now - lastScanTime) < 5000) return;
+  lastScanCode = code; lastScanTime = now;
+
+  const statusEl = document.getElementById('scanStatus');
+  const emp = roster.find(e => e.id === code);
+  if(!emp){
+    vibrateDevice(100);
+    statusEl.textContent = `Scanned "${code}" — not found in the crew list`;
+    statusEl.className = 'status-box err';
+    return;
+  }
+  vibrateDevice([60,40,60]);
+  stopScan();
+  document.getElementById('miniLoadingOverlay').style.display = 'block';
+  statusEl.textContent = `Identified: ${emp.name} — checking status…`;
+  statusEl.className = 'status-box ok';
+  try{ await identifyEmployeeAndPunch(emp.id, emp.name); }
+  finally{ document.getElementById('miniLoadingOverlay').style.display = 'none'; }
+}
+
+// ---------------- Admin approval request flow ----------------
+function openRequestFlow(){
+  document.getElementById('mobileFlow').style.display = 'none';
+  document.getElementById('requestFlow').style.display = 'block';
+}
+function closeRequestFlow(){
+  document.getElementById('requestFlow').style.display = 'none';
+  document.getElementById('mobileFlow').style.display = 'block';
+  document.getElementById('requestStatus').style.display = 'none';
+  document.getElementById('tempPinEntry').style.display = 'none';
+}
+
+async function submitAdminRequest(){
+  const empId = document.getElementById('requestEmpSelect').value;
+  if(!empId){ alert('Select your name first'); return; }
+  const emp = roster.find(e => e.id === empId);
+  const statusEl = document.getElementById('requestStatus');
+  statusEl.style.display = 'block';
+  statusEl.className = 'status-box';
+  statusEl.textContent = 'Sending request…';
+
+  const result = await apiCall({action:'requestAdminApproval', empId, empName: emp.name});
+  if(result && result.success){
+    statusEl.textContent = `Request sent for ${emp.name}. Call your admin now — once they approve, enter the temporary PIN they give you below.`;
+    statusEl.className = 'status-box ok';
+    document.getElementById('tempPinEntry').style.display = 'block';
+    window._pendingRequestEmp = emp;
+  } else if(result && result.error){
+    statusEl.textContent = 'Server error: ' + result.error + ' — make sure your Google Sheet has a "Requests" tab with the correct headers.';
+    statusEl.className = 'status-box err';
+  } else {
+    statusEl.textContent = 'Could not reach the server — check your internet connection and try again';
+    statusEl.className = 'status-box err';
+  }
+}
+
+async function submitTempPin(){
+  const emp = window._pendingRequestEmp;
+  if(!emp){ alert('Send a request first'); return; }
+  const pin = document.getElementById('tempPinInput').value.trim();
+  const statusEl = document.getElementById('requestStatus');
+  const check = await apiCall({action:'verifyTempPin', empId: emp.id, pin});
+  if(check && check.valid){
+    statusEl.textContent = 'Approved! Processing your punch…';
+    statusEl.className = 'status-box ok';
+    document.getElementById('requestFlow').style.display = 'none';
+    document.getElementById('mobileFlow').style.display = 'block';
+    document.getElementById('miniLoadingOverlay').style.display = 'block';
+    try{ await identifyEmployeeAndPunch(emp.id, emp.name); }
+    finally{ document.getElementById('miniLoadingOverlay').style.display = 'none'; }
+  } else {
+    statusEl.textContent = (check && check.error) ? check.error : 'Incorrect or expired PIN';
+    statusEl.className = 'status-box err';
+  }
+}
+
+// ---------------- GPS ----------------
+let gpsReady = false;
+function requestLocation(){
+  const statusEl = document.getElementById('locStatus');
+  statusEl.textContent = '📍 Getting your location… please wait';
+  if(!navigator.geolocation){ statusEl.textContent = 'Location: not supported'; statusEl.className='status-box err'; unlockPunchUI(); return; }
+  const fallbackTimer = setTimeout(()=>{
+    if(!gpsReady){ statusEl.textContent = '⚠️ Continuing without location — GPS took too long'; statusEl.className='status-box err'; unlockPunchUI(); }
+  }, 10000);
+  navigator.geolocation.getCurrentPosition(
+    (pos)=>{
+      clearTimeout(fallbackTimer);
+      currentCoords = {lat: pos.coords.latitude.toFixed(5), lng: pos.coords.longitude.toFixed(5)};
+      statusEl.textContent = `Location captured: ${currentCoords.lat}, ${currentCoords.lng}`;
+      statusEl.className = 'status-box ok';
+      unlockPunchUI();
+    },
+    ()=>{
+      clearTimeout(fallbackTimer);
+      statusEl.textContent = 'Location: permission denied — punch will be logged without GPS';
+      statusEl.className = 'status-box err';
+      currentCoords = null;
+      unlockPunchUI();
+    },
+    {enableHighAccuracy:true, timeout:8000}
+  );
+}
+function unlockPunchUI(){
+  gpsReady = true;
+  const scanBtn = document.getElementById('btnStartScan');
+  if(scanBtn) scanBtn.disabled = false;
+  onEmployeeChange();
+}
+
+// ---------------- Admin: Crew by Department ----------------
+async function renderCrewByDept(){
+  const wrap = document.getElementById('crewByDept');
+  if(roster.length === 0){ wrap.innerHTML = '<div class="roster-item">No employees added yet.</div>'; return; }
+
+  const depts = ['C1-Calibration','R2-Rental','Sales-ClientRelations','Accounts','Management'];
+  let html = '';
+  depts.forEach(dept=>{
+    const members = roster.filter(e => e.department === dept);
+    if(members.length === 0) return;
+    html += `<div class="dept-header">${DEPT_LABELS[dept] || dept}</div>`;
+    html += `<div class="roster-list">` + members.map(e => `
+      <div class="roster-item" style="flex-direction:column;align-items:stretch;">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+          <span style="cursor:pointer;flex:1;min-width:0;" onclick="toggleAdminActivity('${e.id}')">
+            <b>${e.name}</b> (${e.id})
+            <button id="admin-request-${e.id}" class="small-btn" style="display:none;background:#c94b4b;color:#fff;margin-top:4px;" onclick="event.stopPropagation(); approvePunchRequest('${e.id}','${e.name.replace(/'/g,"\\'")}')">🔔 Approval Requested — Tap to Approve</button>
+            <span id="admin-status-${e.id}" style="display:block;font-size:10px;color:#999;margin-top:2px;">Checking…</span>
+          </span>
+          <span style="white-space:nowrap;">
+            <button class="small-btn" style="margin-top:0;" onclick="resetPin('${e.id}', '${e.name.replace(/'/g,"\\'")}')">Reset PIN</button>
+            <button class="del-btn" onclick="deleteEmployee('${e.id}')">Delete</button>
+          </span>
+        </div>
+        <div id="admin-activity-${e.id}" style="display:none;margin-top:8px;padding-top:8px;border-top:1px solid #f2f2f2;"></div>
+      </div>
+    `).join('') + `</div>`;
+  });
+  wrap.innerHTML = html || '<div class="roster-item">No employees added yet.</div>';
+}
+
+let adminTimerInterval = null;
+async function refreshAdminLiveStatuses(){
+  if(roster.length === 0) return;
+  const statuses = await Promise.all(roster.map(e => apiCall({action:'getStatus', empId: e.id})));
+  roster.forEach((e, idx)=>{
+    const status = statuses[idx];
+    const el = document.getElementById(`admin-status-${e.id}`);
+    if(!el) return;
+    if(status && status.lastType === 'IN'){
+      el.innerHTML = `<span class="admin-live-dot"></span><span class="admin-live-timer" data-start="${status.lastTimestamp}">calculating…</span>${status.workType ? ' · '+status.workType : ''} · since ${status.lastTime}`;
+      el.style.color = '#1e5c30';
+    } else {
+      el.textContent = status && status.lastTime ? `Last punched OUT at ${status.lastTime}` : 'Not punched in today';
+      el.style.color = '#999';
+    }
+  });
+  updateAdminTimers();
+  if(!adminTimerInterval) adminTimerInterval = setInterval(updateAdminTimers, 30000);
+}
+function updateAdminTimers(){
+  document.querySelectorAll('.admin-live-timer').forEach(el=>{
+    const start = el.getAttribute('data-start');
+    if(!start) return;
+    const diff = Math.max(0, Date.now() - new Date(start).getTime());
+    el.textContent = `${Math.floor(diff/3600000)}h ${Math.floor((diff%3600000)/60000)}m`;
+  });
+}
+
+async function toggleAdminActivity(empId){
+  const div = document.getElementById(`admin-activity-${empId}`);
+  if(!div) return;
+  const isOpen = div.style.display === 'block';
+  document.querySelectorAll('[id^="admin-activity-"]').forEach(d => d.style.display = 'none');
+  if(isOpen) return;
+
+  div.style.display = 'block';
+  div.innerHTML = '<div class="loading">Loading…</div>';
+
+  const [log, visits, pings] = await Promise.all([
+    apiCall({action:'getLog'}) || [],
+    apiCall({action:'getVisits', empId}) || [],
+    apiCall({action:'getLatestPings'}) || []
+  ]);
+  const todayStr = new Date().toLocaleDateString('en-IN');
+  let todays = (log || []).filter(r => r.empId === empId && r.displayTime && r.displayTime.split(',')[0].trim() === todayStr);
+  todays = todays.slice().reverse();
+
+  const myVisitsToday = (visits || []).filter(v => v.date === Utilities_today());
+  const myPing = (pings || []).find(p => p.empId === empId);
+
+  let html = '<div style="font-size:11px;font-weight:700;color:#444;margin-bottom:8px;">Today\'s Activity</div>';
+  if(todays.length === 0){
+    html += '<div class="loading">No punches yet today.</div>';
+  } else {
+    todays.forEach(r=>{
+      const isIn = r.type === 'IN';
+      const title = isIn ? `Punched In${r.workType ? ' — '+r.workType : ''}` : 'Punched Out';
+      const sub = isIn ? (r.lat ? 'Location verified' : 'No location') : (r.workNote || 'Work update added');
+      const timePart = r.displayTime.split(',')[1] ? r.displayTime.split(',')[1].trim() : r.displayTime;
+      html += `<div class="activity-item"><div class="activity-dot ${isIn?'in':'out'}">${isIn?'✓':'⏱'}</div><div><div class="activity-title">${title}</div><div class="activity-sub">${sub}</div></div><div class="activity-time">${timePart}</div></div>`;
+    });
+  }
+
+  if(myVisitsToday.length > 0){
+    html += '<div style="font-size:11px;font-weight:700;color:#444;margin:14px 0 8px;">Hospital Visits Today</div>';
+    myVisitsToday.forEach(v=>{
+      html += `<div class="visit-list-item">${v.photoUrl ? `<img src="${v.photoUrl}">` : '<div style="width:40px;height:40px;background:#eee;border-radius:6px;flex-shrink:0;"></div>'}<div><div class="vname">${v.hospitalName}</div><div class="vnote">${v.note||''}</div></div></div>`;
+    });
+  }
+
+  if(myPing){
+    const mins = Math.round((Date.now() - new Date(myPing.timestamp).getTime())/60000);
+    const ago = mins < 1 ? 'just now' : mins < 60 ? `${mins} min ago` : `${Math.round(mins/60)}h ago`;
+    const mapLink = (myPing.lat && myPing.lng) ? `<a href="https://www.openstreetmap.org/?mlat=${myPing.lat}&mlon=${myPing.lng}#map=16/${myPing.lat}/${myPing.lng}" target="_blank" style="color:#7a1626;">View on map</a>` : '';
+    html += `<div style="font-size:11px;font-weight:700;color:#444;margin:14px 0 4px;">Last Known Location</div><div style="font-size:11px;color:#888;">Last seen ${ago} ${mapLink}</div>`;
+  }
+
+  div.innerHTML = html;
+}
+
+async function refreshCrewRequestIndicators(){
+  const reqs = await apiCall({action:'getPendingRequests'}) || [];
+  document.querySelectorAll('[id^="admin-request-"]').forEach(el => el.style.display = 'none');
+  reqs.forEach(r=>{
+    const el = document.getElementById(`admin-request-${r.empId}`);
+    if(el) el.style.display = 'inline-block';
+  });
+}
+async function approvePunchRequest(empId, empName){
+  const result = await apiCall({action:'approveRequest', empId});
+  if(result && result.success){
+    alert(`Temporary PIN for ${empName}: ${result.tempPin}\n\nCall them now and read this out. Valid for 5 minutes.`);
+    await refreshCrewRequestIndicators();
+  } else if(result && result.error){
+    alert('Server error: ' + result.error);
+  } else {
+    alert('Could not reach the server — check your internet connection and try again');
+  }
+}
+async function resetPin(empId, empName){
+  if(!confirm(`Reset ${empName}'s PIN? They'll be asked to set a brand new PIN next time they punch in.`)) return;
+  const result = await apiCall({action:'resetPin', empId});
+  alert(result && result.success ? `${empName}'s PIN has been reset.` : 'Could not reset PIN — try again');
+}
+
+// ---------------- Admin: Log / Export ----------------
+async function loadLog(){
+  const wrap = document.getElementById('logTableWrap');
+  wrap.innerHTML = '<div class="loading">Loading log…</div>';
+  if(!apiConfigured()){ wrap.innerHTML = '<div class="loading">Google Sheet not connected yet.</div>'; document.getElementById('dailyExportWrap').innerHTML=''; return; }
+  const log = await apiCall({action:'getAttendance'}) || [];
+  cachedLog = log;
+  if(log.length === 0){ wrap.innerHTML = '<div class="loading">No completed shifts yet.</div>'; document.getElementById('dailyExportWrap').innerHTML = '<div class="loading">No completed shifts yet.</div>'; return; }
+  let html = '<table><tr><th>Date</th><th>Employee</th><th>Type</th><th>In</th><th>Out</th><th>Hours</th><th>Status</th><th>Note</th></tr>';
+  log.forEach(r=>{
+    const badge = r.workStatus ? `<span class="badge ${r.workStatus.toLowerCase()}">${r.workStatus}</span>` : '—';
+    html += `<tr><td>${r.date}</td><td>${r.empName}</td><td>${r.workType||'—'}</td><td>${r.inTime}</td><td>${r.outTime}</td><td>${r.hoursWorked||'—'}</td><td>${badge}</td><td>${r.workNote||'—'}</td></tr>`;
+  });
+  html += '</table>';
+  wrap.innerHTML = html;
+  renderDailyExport(log);
+}
+
+function groupByDate(summary){
+  const groups = {};
+  summary.forEach(r=>{ const k = r.date || 'Unknown'; if(!groups[k]) groups[k]=[]; groups[k].push(r); });
+  return groups;
+}
+function renderDailyExport(summary){
+  const wrap = document.getElementById('dailyExportWrap');
+  const groups = groupByDate(summary);
+  const dates = Object.keys(groups).sort((a,b)=>{
+    const [da,ma,ya]=a.split('/'); const [db,mb,yb]=b.split('/');
+    return new Date(yb,mb-1,db) - new Date(ya,ma-1,da);
+  });
+  wrap.innerHTML = dates.map(dateKey=>{
+    const records = groups[dateKey];
+    const empCount = new Set(records.map(r=>r.empId)).size;
+    return `<div class="roster-item"><span><b>${dateKey}</b><br><span style="color:#888;">${records.length} shifts · ${empCount} employees</span></span><button class="small-btn" onclick="exportDayExcel('${dateKey}')">Export .xlsx</button></div>`;
+  }).join('');
+}
+function exportDayExcel(dateKey){
+  const summary = cachedLog || [];
+  const groups = groupByDate(summary);
+  const records = (groups[dateKey]||[]).slice().sort((a,b)=>a.empName.localeCompare(b.empName));
+  if(records.length === 0){ alert('No records for this date'); return; }
+  const rows = records.map(r=>({"Employee ID":r.empId,"Employee Name":r.empName,"Department":r.department,"Work Type":r.workType,"Punch In":r.inTime,"Punch Out":r.outTime,"Hours Worked":r.hoursWorked,"Work Status":r.workStatus||'',"Work Note":r.workNote||''}));
+  const ws = XLSX.utils.json_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, dateKey.replace(/\//g,'-'));
+  XLSX.writeFile(wb, `TAZAT_Attendance_${dateKey.replace(/\//g,'-')}.xlsx`);
+}
+async function exportAllDaysExcel(){
+  const summary = cachedLog || [];
+  if(summary.length === 0){ alert('No data to export'); return; }
+  const groups = groupByDate(summary);
+  const wb = XLSX.utils.book_new();
+  Object.keys(groups).sort((a,b)=>{ const [da,ma,ya]=a.split('/'); const [db,mb,yb]=b.split('/'); return new Date(ya,ma-1,da)-new Date(yb,mb-1,db); })
+    .forEach(dateKey=>{
+      const records = groups[dateKey].slice().sort((a,b)=>a.empName.localeCompare(b.empName));
+      const rows = records.map(r=>({"Employee ID":r.empId,"Employee Name":r.empName,"Department":r.department,"Work Type":r.workType,"Punch In":r.inTime,"Punch Out":r.outTime,"Hours Worked":r.hoursWorked,"Work Status":r.workStatus||'',"Work Note":r.workNote||''}));
+      const ws = XLSX.utils.json_to_sheet(rows);
+      XLSX.utils.book_append_sheet(wb, ws, dateKey.replace(/\//g,'-'));
+    });
+  XLSX.writeFile(wb, 'TAZAT_Attendance_AllDays.xlsx');
+}
+async function exportCSV(){
+  const summary = cachedLog || [];
+  if(summary.length === 0){ alert('No data to export'); return; }
+  let csv = 'Date,Employee ID,Employee Name,Department,Work Type,Punch In,Punch Out,Hours Worked,Work Status,Work Note\n';
+  summary.forEach(r=>{
+    const note = (r.workNote||'').replace(/"/g,'""');
+    csv += `${r.date},${r.empId},${r.empName},${r.department},${r.workType},${r.inTime},${r.outTime},${r.hoursWorked||''},${r.workStatus||''},"${note}"\n`;
+  });
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'TAZAT_attendance_summary.csv'; a.click();
+}
+
+// ---------------- Admin tab / PIN gate ----------------
+function switchTab(tab){
+  document.getElementById('tabPunch').classList.toggle('active', tab==='punch');
+  document.getElementById('tabAdmin').classList.toggle('active', tab==='admin');
+  document.getElementById('punchPanel').style.display = tab==='punch' ? 'block' : 'none';
+  document.getElementById('adminPanel').style.display = tab==='admin' ? 'block' : 'none';
+  if(tab==='admin'){
+    if(adminUnlocked || sessionStorage.getItem('tazat_admin_unlocked') === 'true'){
+      adminUnlocked = true;
+      document.getElementById('pinGate').style.display = 'none';
+      document.getElementById('adminContent').style.display = 'block';
+      loadLog(); renderCrewByDept(); refreshAdminLiveStatuses(); refreshCrewRequestIndicators();
+      startAdminPolling();
+    } else {
+      document.getElementById('pinGate').style.display = 'block';
+      document.getElementById('adminContent').style.display = 'none';
+    }
+  } else {
+    stopAdminPolling();
+  }
+}
+function checkPin(){
+  const val = document.getElementById('adminPinInput').value;
+  if(val === ADMIN_PIN){
+    adminUnlocked = true;
+    sessionStorage.setItem('tazat_admin_unlocked', 'true');
+    document.getElementById('pinGate').style.display = 'none';
+    document.getElementById('adminContent').style.display = 'block';
+    loadLog(); renderCrewByDept(); refreshAdminLiveStatuses(); refreshCrewRequestIndicators();
+    startAdminPolling();
+  } else {
+    document.getElementById('pinError').style.display = 'block';
+  }
+}
+function adminSignOut(){
+  adminUnlocked = false;
+  sessionStorage.removeItem('tazat_admin_unlocked');
+  document.getElementById('adminPinInput').value = '';
+  document.getElementById('pinError').style.display = 'none';
+  document.getElementById('pinGate').style.display = 'block';
+  document.getElementById('adminContent').style.display = 'none';
+  if(adminTimerInterval){ clearInterval(adminTimerInterval); adminTimerInterval = null; }
+  stopAdminPolling();
+}
+let adminPollInterval = null;
+function startAdminPolling(){
+  stopAdminPolling();
+  adminPollInterval = setInterval(()=>{ refreshAdminLiveStatuses(); refreshCrewRequestIndicators(); }, 15000);
+}
+function stopAdminPolling(){ if(adminPollInterval){ clearInterval(adminPollInterval); adminPollInterval = null; } }
 
 window.onload = async function(){
   setupDeviceFlow();
