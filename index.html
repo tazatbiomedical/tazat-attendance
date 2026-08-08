@@ -437,7 +437,7 @@
 // ============================================================
 // SETUP: paste your Google Apps Script Web App URL below.
 // ============================================================
-const API_URL = "https://script.google.com/macros/s/AKfycbzOT5Pc7gDepHBgOkIGD3-CuitEPf1cRC2NCsU8V7XnSebnu5_Hu1Dc5x6WQ9V46qDy/exec";
+const API_URL = "PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE";
 
 const WORK_TYPES = {
   'C1-Calibration': ['Hospital Visit','Calibration Service'],
@@ -460,7 +460,7 @@ let cachedLog = [];
 let currentCoords = null;
 let pendingPunch = null;
 let currentWorkType = '';
-const ADMIN_PIN = "5055"; // change this to your own 4-digit PIN
+const ADMIN_PIN = "1234"; // change this to your own 4-digit PIN
 let adminUnlocked = false;
 
 function apiConfigured(){ return API_URL && API_URL.indexOf("PASTE_YOUR") === -1; }
@@ -1288,8 +1288,21 @@ async function toggleAdminActivity(empId){
   if(myPing){
     const mins = Math.round((Date.now() - new Date(myPing.timestamp).getTime())/60000);
     const ago = mins < 1 ? 'just now' : mins < 60 ? `${mins} min ago` : `${Math.round(mins/60)}h ago`;
-    const mapLink = (myPing.lat && myPing.lng) ? `<a href="https://www.openstreetmap.org/?mlat=${myPing.lat}&mlon=${myPing.lng}#map=16/${myPing.lat}/${myPing.lng}" target="_blank" style="color:#7a1626;">View on map</a>` : '';
-    html += `<div style="font-size:11px;font-weight:700;color:#444;margin:14px 0 4px;">Last Known Location</div><div style="font-size:11px;color:#888;">Last seen ${ago} ${mapLink}</div>`;
+    html += `<div style="font-size:11px;font-weight:700;color:#444;margin:14px 0 4px;">Last Known Location</div>`;
+    if(myPing.lat && myPing.lng){
+      const lat = parseFloat(myPing.lat), lng = parseFloat(myPing.lng);
+      const d = 0.004; // small bounding box around the point, roughly a few hundred meters
+      const bbox = `${lng-d}%2C${lat-d}%2C${lng+d}%2C${lat+d}`;
+      const embedUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat}%2C${lng}`;
+      const fullUrl = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=16/${lat}/${lng}`;
+      html += `
+        <div style="font-size:11px;color:#888;margin-bottom:6px;">Last seen ${ago}</div>
+        <iframe src="${embedUrl}" style="width:100%;height:160px;border:1px solid #eee;border-radius:8px;" loading="lazy"></iframe>
+        <div style="text-align:right;margin-top:4px;"><a href="${fullUrl}" target="_blank" style="font-size:10.5px;color:#7a1626;">Open full map ↗</a></div>
+      `;
+    } else {
+      html += `<div style="font-size:11px;color:#888;">Last seen ${ago} — no coordinates recorded</div>`;
+    }
   }
 
   div.innerHTML = html;
