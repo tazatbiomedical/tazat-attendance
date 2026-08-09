@@ -925,12 +925,16 @@ async function refreshEmployeeUI(empId, empName){
 let pingInterval = null;
 function startLocationPinging(empId, empName){
   if(pingInterval) return;
-  pingInterval = setInterval(()=>{
+
+  function sendPing(){
     if(!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition((pos)=>{
       apiCall({action:'logPing', empId, empName, lat: pos.coords.latitude.toFixed(5), lng: pos.coords.longitude.toFixed(5)});
     }, ()=>{});
-  }, 600000);
+  }
+
+  sendPing(); // fire immediately so the live map has something to show right away, not after a 10-min wait
+  pingInterval = setInterval(sendPing, 600000);
 }
 function stopLocationPinging(){ if(pingInterval){ clearInterval(pingInterval); pingInterval = null; } }
 
