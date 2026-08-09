@@ -460,7 +460,7 @@ let cachedLog = [];
 let currentCoords = null;
 let pendingPunch = null;
 let currentWorkType = '';
-const ADMIN_PIN = "1234"; // change this to your own 4-digit PIN
+const ADMIN_PIN = "5055"; // change this to your own 4-digit PIN
 let adminUnlocked = false;
 
 function apiConfigured(){ return API_URL && API_URL.indexOf("PASTE_YOUR") === -1; }
@@ -801,7 +801,6 @@ function fileToBase64(file){
 
 async function loadTodaysVisits(empId){
   const visits = await apiCall({action:'getVisits', empId}) || [];
-  const todayStr = new Date().toLocaleDateString('en-GB').split('/').join('/'); // dd/mm/yyyy roughly
   const todays = visits.filter(v => v.date === Utilities_today());
   const wrap = document.getElementById('todaysVisitsList');
   if(todays.length === 0){
@@ -821,7 +820,9 @@ async function loadTodaysVisits(empId){
 
 function Utilities_today(){
   const d = new Date();
-  return `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
+  const dd = String(d.getDate()).padStart(2,'0');
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  return `${dd}/${mm}/${d.getFullYear()}`;
 }
 
 // ---------------- Employee card / timer / activity ----------------
@@ -1253,11 +1254,23 @@ async function toggleAdminActivity(empId){
   div.style.display = 'block';
   div.innerHTML = '<div class="loading">Loading…</div>';
 
-  const [log, visits, pings] = await Promise.all([
-    apiCall({action:'getLog'}) || [],
-    apiCall({action:'getVisits', empId}) || [],
-    apiCall({action:'getLatestPings'}) || []
-  ]);
+  let log, visits, pings;
+  try{
+    const results = await Promise.all([
+      apiCall({action:'getLog'}),
+      apiCall({action:'getVisits', empId}),
+      apiCall({action:'getLatestPings'})
+    ]);
+    log = Array.isArray(results[0]) ? results[0] : [];
+    visits = Array.isArray(results[1]) ? results[1] : [];
+    pings = Array.isArray(results[2]) ? results[2] : [];
+    if(!Array.isArray(results[0]) || !Array.isArray(results[1]) || !Array.isArray(results[2])){
+      console.warn('One of the admin activity calls did not return an array — check that your Apps Script is redeployed and the Visits/Pings tabs exist.', results);
+    }
+  }catch(err){
+    div.innerHTML = `<div class="loading" style="color:#c94b4b;">Could not load — ${err.message}. Check that your Apps Script is redeployed with the latest version and the Visits/Pings tabs exist.</div>`;
+    return;
+  }
   const todayStr = new Date().toLocaleDateString('en-IN');
   let todays = (log || []).filter(r => r.empId === empId && r.displayTime && r.displayTime.split(',')[0].trim() === todayStr);
   todays = todays.slice().reverse();
@@ -1341,10 +1354,15 @@ async function loadLog(){
   const log = await apiCall({action:'getAttendance'}) || [];
   cachedLog = log;
   if(log.length === 0){ wrap.innerHTML = '<div class="loading">No completed shifts yet.</div>'; document.getElementById('dailyExportWrap').innerHTML = '<div class="loading">No completed shifts yet.</div>'; return; }
-  let html = '<table><tr><th>Date</th><th>Employee</th><th>Type</th><th>In</th><th>Out</th><th>Hours</th><th>Status</th><th>Note</th></tr>';
-  log.forEach(r=>{
+  let html = '<table style="table-layout:fixed;width:100%;"><tr><th style="width:11%;">Date</th><th style="width:13%;">Employee</th><th style="width:13%;">Type</th><th style="width:11%;">In</th><th style="width:11%;">Out</th><th style="width:7%;">Hrs</th><th style="width:11%;">Status</th><th style="width:23%;">Note</th></tr>';
+  log.forEach((r,idx)=>{
     const badge = r.workStatus ? `<span class="badge ${r.workStatus.toLowerCase()}">${r.workStatus}</span>` : '—';
-    html += `<tr><td>${r.date}</td><td>${r.empName}</td><td>${r.workType||'—'}</td><td>${r.inTime}</td><td>${r.outTime}</td><td>${r.hoursWorked||'—'}</td><td>${badge}</td><td>${r.workNote||'—'}</td></tr>`;
+    const note = r.workNote || '—';
+    const isLong = note.length > 40;
+    const noteCell = isLong
+      ? `<span id="note-short-${idx}" style="cursor:pointer;" onclick="document.getElementById('note-short-${idx}').style.display='none';document.getElementById('note-full-${idx}').style.display='inline';">${note.slice(0,40)}… <span style="color:#7a1626;font-weight:700;">more</span></span><span id="note-full-${idx}" style="display:none;">${note}</span>`
+      : note;
+    html += `<tr><td style="overflow:hidden;text-overflow:ellipsis;">${r.date}</td><td style="overflow:hidden;text-overflow:ellipsis;">${r.empName}</td><td style="overflow:hidden;text-overflow:ellipsis;">${r.workType||'—'}</td><td style="overflow:hidden;text-overflow:ellipsis;">${r.inTime}</td><td style="overflow:hidden;text-overflow:ellipsis;">${r.outTime}</td><td>${r.hoursWorked||'—'}</td><td>${badge}</td><td style="word-break:break-word;">${noteCell}</td></tr>`;
   });
   html += '</table>';
   wrap.innerHTML = html;
