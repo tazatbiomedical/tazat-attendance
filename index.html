@@ -288,6 +288,11 @@
     <div class="wb-timer"><b id="wbTimer">00h 00m</b><span>Working Time</span></div>
   </div>
 
+  <div id="checkInReminder" style="display:none;background:#fff3d6;color:#8a5a00;font-size:12px;padding:10px 14px;border-radius:10px;margin-bottom:14px;">
+    📍 Haven't heard from you in a while — tap below to update your location.
+  </div>
+  <button id="checkInBtn" style="display:none;width:100%;background:var(--gold);color:var(--maroon-dark);border:none;border-radius:10px;padding:10px;font-size:13px;font-weight:700;margin-bottom:14px;" onclick="manualCheckIn()">📍 Check In Here</button>
+
   <div id="desktopFlow" style="display:none;">
     <label>Select Employee</label>
     <select id="empSelect" onchange="onEmployeeChange()"><option value="">Loading crew…</option></select>
@@ -357,13 +362,16 @@
   </div>
 
   <div id="outDetails">
-    <label>Work Status</label>
-    <select id="workStatus">
-      <option value="Pending">Pending</option>
-      <option value="Completed">Completed</option>
-    </select>
-    <label>What work was done?</label>
+    <label>Work Done</label>
     <textarea id="workNote" placeholder="e.g. Calibrated 3 ventilators, visited 4 hospitals today"></textarea>
+    <label>Remarks / Pending</label>
+    <textarea id="workRemarks" placeholder="e.g. Waiting for management approval — leave blank if nothing pending"></textarea>
+    <label>Status</label>
+    <select id="workStatus">
+      <option value="In Progress">In Progress</option>
+      <option value="Completed">Completed</option>
+      <option value="Pending Approval">Pending Approval</option>
+    </select>
     <button class="btn-out" id="btnConfirmOut" style="width:100%;margin-top:12px;" onclick="confirmPunchOut()">Confirm Punch OUT</button>
   </div>
 
@@ -389,7 +397,17 @@
       <button class="small-btn" style="background:#c94b4b;color:#fff;" onclick="adminSignOut()">🔒 Sign Out</button>
     </div>
 
-    <label>Manage Crew</label>
+    <label>📄 Download Work Log</label>
+    <div class="roster-row">
+      <input type="month" id="reportMonthPicker" style="flex:1;">
+    </div>
+    <div class="roster-row">
+      <button class="small-btn" style="flex:1;" onclick="downloadMonthlyReport('pdf')">Download PDF</button>
+      <button class="small-btn" style="flex:1;" onclick="downloadMonthlyReport('docx')">Download Word</button>
+    </div>
+    <div id="reportStatus" style="font-size:11px;color:#888;margin-top:4px;"></div>
+
+    <label style="margin-top:20px;">Manage Crew</label>
     <div class="roster-row">
       <input id="newEmpName" placeholder="Employee name">
       <input id="newEmpId" placeholder="Employee ID" style="max-width:100px;">
@@ -492,6 +510,37 @@ function showSetupWarning(){
 }
 
 // ---------------- Roster ----------------
+async function downloadMonthlyReport(format){
+  const monthVal = document.getElementById('reportMonthPicker').value; // "YYYY-MM"
+  if(!monthVal){ alert('Pick a month first'); return; }
+  const [year, month] = monthVal.split('-').map(Number);
+
+  const statusEl = document.getElementById('reportStatus');
+  statusEl.textContent = 'Generating report… this can take a few seconds.';
+
+  const result = await apiCall({action:'generateMonthlyReport', month, year, format});
+
+  if(!result || !result.success){
+    statusEl.textContent = (result && result.error) ? ('Error: ' + result.error) : 'Could not generate report — check your internet connection and try again.';
+    return;
+  }
+
+  const byteChars = atob(result.base64);
+  const byteNumbers = new Array(byteChars.length);
+  for(let i = 0; i < byteChars.length; i++){ byteNumbers[i] = byteChars.charCodeAt(i); }
+  const byteArray = new Uint8Array(byteNumbers);
+  const blob = new Blob([byteArray], {type: result.mimeType});
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = result.fileName;
+  a.click();
+  URL.revokeObjectURL(url);
+
+  statusEl.textContent = '✓ Downloaded ' + result.fileName;
+}
+
 async function loadRoster(){
   showSetupWarning();
   if(!apiConfigured()){ roster = []; renderRosterSelect(); return; }
@@ -663,7 +712,7 @@ function pickWorkType(department){
 }
 
 // ---------------- Punch save ----------------
-async function savePunch(type, status, note){
+async function savePunch(type, status, note, remarks){
   if(!apiConfigured()){ alert('Setup not complete yet — the Google Sheet link needs to be added to this page first.'); return; }
   document.getElementById('btnIn').disabled = true;
   document.getElementById('btnOut').disabled = true;
@@ -673,7 +722,8 @@ async function savePunch(type, status, note){
     empId: pendingPunch.empId, empName: pendingPunch.empName, type,
     timestamp: now.toISOString(), displayTime: now.toLocaleString('en-IN'),
     lat: currentCoords ? currentCoords.lat : '', lng: currentCoords ? currentCoords.lng : '',
-    workStatus: status || '', workNote: note || '', workType: type === 'IN' ? currentWorkType : ''
+    workStatus: status || '', workNote: note || '', workType: type === 'IN' ? currentWorkType : '',
+    remarks: remarks || ''
   };
 
   const result = await apiCall({action:'addPunch', ...record});
@@ -718,18 +768,20 @@ async function confirmPunchOut(){
   const note = document.getElementById('workNote').value.trim();
   if(!note){ alert('Please describe the work done before punching out'); return; }
   const status = document.getElementById('workStatus').value;
+  const remarks = document.getElementById('workRemarks').value.trim();
 
   const confirmBtn = document.getElementById('btnConfirmOut');
   const originalText = confirmBtn.textContent;
   confirmBtn.disabled = true;
   confirmBtn.innerHTML = '<span class="processing-text"><span class="spinner"></span> Processing… please wait</span>';
 
-  await savePunch('OUT', status, note);
+  await savePunch('OUT', status, note, remarks);
 
   confirmBtn.disabled = false;
   confirmBtn.textContent = originalText;
   document.getElementById('outDetails').classList.remove('show');
   document.getElementById('workNote').value = '';
+  document.getElementById('workRemarks').value = '';
 }
 
 // ---------------- Visit logging ----------------
@@ -852,6 +904,8 @@ function hideEmployeeCard(){
   document.getElementById('activityCard').classList.remove('show');
   document.getElementById('todaysVisitsWrap').style.display = 'none';
   document.getElementById('btnLogVisit').style.display = 'none';
+  document.getElementById('checkInBtn').style.display = 'none';
+  document.getElementById('checkInReminder').style.display = 'none';
 }
 
 let workTimerInterval = null;
@@ -914,11 +968,50 @@ async function refreshEmployeeUI(empId, empName){
       document.getElementById('todaysVisitsWrap').style.display = 'block';
       await loadTodaysVisits(empId);
     }
+    await updateCheckInUI(empId);
   } else {
     stopWorkTimer();
     stopLocationPinging();
+    document.getElementById('checkInBtn').style.display = 'none';
+    document.getElementById('checkInReminder').style.display = 'none';
   }
   await renderTodayActivity(empId);
+}
+
+async function updateCheckInUI(empId){
+  const checkInBtn = document.getElementById('checkInBtn');
+  const reminder = document.getElementById('checkInReminder');
+  checkInBtn.style.display = 'block';
+
+  const pings = await apiCall({action:'getLatestPings'}) || [];
+  const mine = pings.find(p => p.empId === empId);
+  if(mine){
+    const mins = (Date.now() - new Date(mine.timestamp).getTime()) / 60000;
+    reminder.style.display = mins > 20 ? 'block' : 'none';
+  } else {
+    reminder.style.display = 'block';
+  }
+}
+
+async function manualCheckIn(){
+  if(!navigator.geolocation){ alert('Location not supported on this device'); return; }
+  const btn = document.getElementById('checkInBtn');
+  btn.disabled = true;
+  btn.textContent = 'Checking in…';
+  navigator.geolocation.getCurrentPosition(async (pos)=>{
+    await apiCall({
+      action:'logPing', empId: pendingPunch.empId, empName: pendingPunch.empName,
+      lat: pos.coords.latitude.toFixed(5), lng: pos.coords.longitude.toFixed(5)
+    });
+    btn.disabled = false;
+    btn.textContent = '✓ Checked in!';
+    document.getElementById('checkInReminder').style.display = 'none';
+    setTimeout(()=>{ btn.textContent = '📍 Check In Here'; }, 2500);
+  }, ()=>{
+    btn.disabled = false;
+    btn.textContent = '📍 Check In Here';
+    alert('Could not get your location — check location permission and try again.');
+  });
 }
 
 // Periodic location pings while punched in — every 10 minutes
@@ -934,7 +1027,7 @@ function startLocationPinging(empId, empName){
   }
 
   sendPing(); // fire immediately so the live map has something to show right away, not after a 10-min wait
-  pingInterval = setInterval(sendPing, 600000);
+  pingInterval = setInterval(sendPing, 180000); // every 3 minutes
 }
 function stopLocationPinging(){ if(pingInterval){ clearInterval(pingInterval); pingInterval = null; } }
 
@@ -1305,6 +1398,12 @@ async function toggleAdminActivity(empId){
   if(myPing){
     const mins = Math.round((Date.now() - new Date(myPing.timestamp).getTime())/60000);
     const ago = mins < 1 ? 'just now' : mins < 60 ? `${mins} min ago` : `${Math.round(mins/60)}h ago`;
+    const isStale = mins > 10; // pings should arrive every ~3 min while active — anything past 10 means tracking has lapsed
+    const staleStyle = isStale ? 'color:#c94b4b;font-weight:700;' : 'color:#888;';
+    const staleWarning = isStale ? ' ⚠️ tracking may have stopped (phone locked / app closed)' : '';
+    const sourceLabel = myPing.source && myPing.source.startsWith('visit:')
+      ? ` · from hospital visit log (${myPing.source.replace('visit: ','')})`
+      : '';
     html += `<div style="font-size:11px;font-weight:700;color:#444;margin:14px 0 4px;">Last Known Location</div>`;
     if(myPing.lat && myPing.lng){
       const lat = parseFloat(myPing.lat), lng = parseFloat(myPing.lng);
@@ -1313,12 +1412,12 @@ async function toggleAdminActivity(empId){
       const embedUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat}%2C${lng}`;
       const fullUrl = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=16/${lat}/${lng}`;
       html += `
-        <div style="font-size:11px;color:#888;margin-bottom:6px;">Last seen ${ago}</div>
+        <div style="font-size:11px;margin-bottom:6px;${staleStyle}">Last seen ${ago}${staleWarning}${sourceLabel}</div>
         <iframe src="${embedUrl}" style="width:100%;height:160px;border:1px solid #eee;border-radius:8px;" loading="lazy"></iframe>
         <div style="text-align:right;margin-top:4px;"><a href="${fullUrl}" target="_blank" style="font-size:10.5px;color:#7a1626;">Open full map ↗</a></div>
       `;
     } else {
-      html += `<div style="font-size:11px;color:#888;">Last seen ${ago} — no coordinates recorded</div>`;
+      html += `<div style="font-size:11px;${staleStyle}">Last seen ${ago}${staleWarning} — no coordinates recorded</div>`;
     }
   }
 
@@ -1360,7 +1459,8 @@ async function loadLog(){
   if(log.length === 0){ wrap.innerHTML = '<div class="loading">No completed shifts yet.</div>'; document.getElementById('dailyExportWrap').innerHTML = '<div class="loading">No completed shifts yet.</div>'; return; }
   let html = '<table style="table-layout:fixed;width:100%;"><tr><th style="width:11%;">Date</th><th style="width:13%;">Employee</th><th style="width:13%;">Type</th><th style="width:11%;">In</th><th style="width:11%;">Out</th><th style="width:7%;">Hrs</th><th style="width:11%;">Status</th><th style="width:23%;">Note</th></tr>';
   log.forEach((r,idx)=>{
-    const badge = r.workStatus ? `<span class="badge ${r.workStatus.toLowerCase()}">${r.workStatus}</span>` : '—';
+    const badgeClass = r.workStatus === 'Completed' ? 'completed' : 'pending';
+    const badge = r.workStatus ? `<span class="badge ${badgeClass}">${r.workStatus}</span>` : '—';
     const note = r.workNote || '—';
     const isLong = note.length > 40;
     const noteCell = isLong
